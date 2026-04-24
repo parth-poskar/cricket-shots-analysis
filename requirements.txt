@@ -1,0 +1,22 @@
+# ── Video processing ─────────────────────────────
+    opencv-python
+mediapipe
+yt-dlp
+
+# ── Core ────────────────────────────────────────
+numpy
+pandas
+
+# ── ML (existing) ───────────────────────────────
+scikit-learn
+xgboost
+joblib
+
+# ── PyTorch (NEW) ───────────────────────────────
+torch
+torchvision
+
+# ── Backend ─────────────────────────────────────
+fastapi
+uvicorn[standard]
+python-multipart

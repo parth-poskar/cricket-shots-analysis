@@ -1,0 +1,17 @@
+{
+    "label": "Poor",
+    "probabilities": {
+        "Poor": 0.243,
+        "Average": 0.1397,
+        "Good": 0.6173
+    },
+    "confidence": 0.6173,
+    "model_used": "SVM",
+    "frame_count": 121,
+    "mean_features": {
+        "elbow_angle": 147.0189,
+        "spine_lean": 36.0579,
+        "head_over_knee": 0.0633,
+        "foot_direction": 159.2228
+    }
+}

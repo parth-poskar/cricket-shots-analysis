@@ -1,0 +1,44 @@
+{
+    "quality": {
+        "label": "Poor",
+        "probabilities": {
+            "Poor": 0.2441,
+            "Average": 0.1372,
+            "Good": 0.6186
+        },
+        "confidence": 0.6186,
+        "model_used": "SVM",
+        "frame_count": 51,
+        "mean_features": {
+            "elbow_angle": 90.2066,
+            "spine_lean": 12.3221,
+            "head_over_knee": 0.0261,
+            "foot_direction": 121.4088
+        }
+    },
+    "shot_type": {
+        "shot_type": "Cover Drive",
+        "confidence": 0.4033,
+        "all_probabilities": {
+            "Cover Drive": 0.4033,
+            "Cut Shot": 0.17,
+            "Leg Glance": 0.1353,
+            "Pull Shot": 0.2744,
+            "Straight Drive": 0.0169
+        },
+        "low_confidence": true,
+        "mean_features": {
+            "elbow_angle": 103.99,
+            "wrist_height": 0.791,
+            "hip_rotation": 24.451,
+            "knee_bend": 157.004,
+            "spine_lean": 13.769,
+            "foot_stance_width": 0.386,
+            "bat_plane": 51.999,
+            "weight_forward": 0.256
+        }
+    },
+    "frame_count": 54,
+    "avg_fps": 25.92,
+    "annotated_video_filename": "rohitsharma_annotated.mp4"
+}

@@ -1,0 +1,34 @@
+{
+    "quality": {
+        "label": "Poor",
+        "probabilities": {
+            "Poor": 0.2444,
+            "Average": 0.1431,
+            "Good": 0.6125
+        },
+        "confidence": 0.6125,
+        "model_used": "SVM",
+        "frame_count": 392,
+        "mean_features": {
+            "elbow_angle": 129.1841,
+            "spine_lean": 55.5677,
+            "head_over_knee": 0.2085,
+            "foot_direction": 156.4995
+        }
+    },
+    "shot_type": {
+        "shot_type": "Leg Glance Shot",
+        "confidence": 0.5916247963905334,
+        "all_probabilities": {
+            "Cut Shot": 0.0337,
+            "Cover Drive": 0.0514,
+            "Straight Drive": 0.2836,
+            "Pull Shot": 0.0396,
+            "Leg Glance Shot": 0.5916
+        },
+        "low_confidence": false
+    },
+    "frame_count": 392,
+    "avg_fps": 54.69,
+    "annotated_video_filename": "tmpjv_j0mbc_annotated.mp4"
+}

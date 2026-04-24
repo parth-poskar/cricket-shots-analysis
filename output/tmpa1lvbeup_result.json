@@ -1,0 +1,34 @@
+{
+    "quality": {
+        "label": "Poor",
+        "probabilities": {
+            "Poor": 0.2425,
+            "Average": 0.1292,
+            "Good": 0.6283
+        },
+        "confidence": 0.6283,
+        "model_used": "SVM",
+        "frame_count": 334,
+        "mean_features": {
+            "elbow_angle": 134.5808,
+            "spine_lean": 14.8019,
+            "head_over_knee": 0.033,
+            "foot_direction": 70.3934
+        }
+    },
+    "shot_type": {
+        "shot_type": "Leg Glance Shot",
+        "confidence": 0.38187646865844727,
+        "all_probabilities": {
+            "Cut Shot": 0.1231,
+            "Cover Drive": 0.0603,
+            "Straight Drive": 0.2449,
+            "Pull Shot": 0.1899,
+            "Leg Glance Shot": 0.3819
+        },
+        "low_confidence": true
+    },
+    "frame_count": 342,
+    "avg_fps": 46.13,
+    "annotated_video_filename": "tmpa1lvbeup_annotated.mp4"
+}
