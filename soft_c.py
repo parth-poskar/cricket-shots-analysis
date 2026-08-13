@@ -42,11 +42,11 @@ import os
 #   ELBOW_ANGLE_GOOD_THRESHOLD  = (90, 180)
 #   SPINE_LEAN_GOOD_RANGE       = (80, 100)
 #
-# A hard rule says "elbow_angle=89 → Bad". But 89° vs 90° is almost identical.
+# A hard rule says "elbow_angle=89 -> Bad". But 89° vs 90° is almost identical.
 # Fuzzy logic expresses this as a *degree of membership* in [0, 1]:
-#   elbow_angle=135  → membership 1.0  (perfectly inside range)
-#   elbow_angle=95   → membership 0.9  (mostly good, near the edge)
-#   elbow_angle=60   → membership 0.1  (mostly bad, far from range)
+#   elbow_angle=135  -> membership 1.0  (perfectly inside range)
+#   elbow_angle=95   -> membership 0.9  (mostly good, near the edge)
+#   elbow_angle=60   -> membership 0.1  (mostly bad, far from range)
 #
 # Membership functions used:
 #   • Trapezoidal (trapz)  — for ranges with a flat "best zone"
@@ -70,7 +70,7 @@ class FuzzyEvaluator:
             0   ___/        \___
                 a  b        c  d
 
-        Fully 'in' for x in [b, c]; linearly rises from a→b and falls from c→d.
+        Fully 'in' for x in [b, c]; linearly rises from a->b and falls from c->d.
         x: input value
         a, b, c, d: feet and shoulders of the trapezoid (a < b <= c < d)
         """
@@ -92,7 +92,7 @@ class FuzzyEvaluator:
             0  ____/  \____
                a   b   c
 
-        Peaks at x=b; linearly rises from a→b and falls from b→c.
+        Peaks at x=b; linearly rises from a->b and falls from b->c.
         """
         if x <= a or x >= c:
             return 0.0
@@ -110,7 +110,7 @@ class FuzzyEvaluator:
     def elbow_fuzzy(self, angle):
         """
         Good elbow angle for cover drive: 90°–160° (peak 110°–140°).
-        Below 60° → fully collapsed arm (bad). Above 180° → over-extended (bad).
+        Below 60° -> fully collapsed arm (bad). Above 180° -> over-extended (bad).
         """
         return self.trapz_membership(angle, 60, 90, 160, 185)
 
@@ -127,7 +127,7 @@ class FuzzyEvaluator:
         config: HEAD_OVER_KNEE_GOOD_THRESHOLD = 0.1
         0.0 is perfect; beyond 0.2 starts becoming poor.
         """
-        # Invert: closeness to 0 is best → map 0 → 1.0, 0.2+ → 0.0
+        # Invert: closeness to 0 is best -> map 0 -> 1.0, 0.2+ -> 0.0
         return self.trapz_membership(distance, -0.01, 0.0, 0.05, 0.2)
 
     def foot_direction_fuzzy(self, angle):
@@ -145,10 +145,10 @@ class FuzzyEvaluator:
         Output: dict with fuzzy score [0,1] per metric + weighted overall score.
         
         Weights reflect coaching importance for a cover drive:
-          Swing Control (elbow)  → 30%
-          Head Position          → 30%
-          Balance (spine)        → 20%
-          Footwork               → 20%
+          Swing Control (elbow)  -> 30%
+          Head Position          -> 30%
+          Balance (spine)        -> 20%
+          Footwork               -> 20%
         """
         if metrics is None:
             return {}
@@ -188,7 +188,7 @@ class FuzzyEvaluator:
     def evaluate_to_json(self, metrics: dict, output_dir: str = "output") -> dict:
         """
         Evaluate and also save fuzzy scores alongside the existing evaluation.json.
-        Mirrors the pattern used in evaluation.py → save_evaluation().
+        Mirrors the pattern used in evaluation.py -> save_evaluation().
         """
         result = self.evaluate(metrics)
         os.makedirs(output_dir, exist_ok=True)
@@ -209,9 +209,9 @@ class FuzzyEvaluator:
 #
 # Instead of manually coding rules for all combinations, a neural network can
 # LEARN the mapping:
-#   features → shot quality (Good / Average / Poor)
+#   features -> shot quality (Good / Average / Poor)
 #
-# Architecture:  Input(4) → Hidden(8, ReLU) → Hidden(4, ReLU) → Output(3, Softmax)
+# Architecture:  Input(4) -> Hidden(8, ReLU) -> Hidden(4, ReLU) -> Output(3, Softmax)
 # Training:      Backpropagation with cross-entropy loss (implemented from scratch)
 # This is a classic soft computing / ANN demonstration, perfect for mini-project.
 # ══════════════════════════════════════════════════════════════════════════════
@@ -221,7 +221,7 @@ class NeuralNetClassifier:
     3-class feedforward neural network for shot quality classification.
     Classes:  0 = Poor | 1 = Average | 2 = Good
     
-    Architecture: 4 → 8 → 4 → 3  (all weights initialised with He init)
+    Architecture: 4 -> 8 -> 4 -> 3  (all weights initialised with He init)
     """
 
     CLASSES = ["Poor", "Average", "Good"]
@@ -373,7 +373,7 @@ class NeuralNetClassifier:
 
     @staticmethod
     def _metrics_to_vector(metrics: dict) -> np.ndarray:
-        """Convert metrics dict → 4-element numpy array (same order as training)."""
+        """Convert metrics dict -> 4-element numpy array (same order as training)."""
         return np.array([
             metrics["elbow_angle"],
             metrics["spine_lean"],
@@ -390,7 +390,7 @@ class NeuralNetClassifier:
                        W3=self.W3, b3=self.b3,
                        mu=self.mu if self.mu is not None else np.zeros(4),
                        std=self.std if self.std is not None else np.ones(4))
-        print(f"Weights saved → {path}")
+        print(f"Weights saved -> {path}")
 
     def load_weights(self, path: str = "output/nn_weights.npz"):
         data = np.load(path)
@@ -411,9 +411,9 @@ def generate_synthetic_training_data(n_samples: int = 300, seed: int = 0) -> tup
     In a real project you would replace this with frames labelled by a coach.
 
     Rules (mirrors the fuzzy membership logic):
-      Good    → all metrics near ideal ranges
-      Average → some metrics near boundary
-      Poor    → metrics clearly outside ranges
+      Good    -> all metrics near ideal ranges
+      Average -> some metrics near boundary
+      Poor    -> metrics clearly outside ranges
 
     Returns
     -------
@@ -503,8 +503,8 @@ if __name__ == "__main__":
     prediction = nn.predict(sample_metrics)
     proba      = nn.predict_proba(sample_metrics)
 
-    print(f"  → Predicted class : {prediction}")
-    print(f"  → Class probabilities:")
+    print(f"  -> Predicted class : {prediction}")
+    print(f"  -> Class probabilities:")
     for cls, p in proba.items():
         bar = "█" * int(p * 30)
         print(f"     {cls:<10} {p:.4f}  {bar}")

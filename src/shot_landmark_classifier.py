@@ -64,7 +64,7 @@ _MP = {
 # ---------------------------------------------------------------------------
 
 def _angle(a, b, c) -> float:
-    """Angle (degrees) at vertex b, between rays b→a and b→c."""
+    """Angle (degrees) at vertex b, between rays b->a and b->c."""
     ba = (a[0] - b[0], a[1] - b[1])
     bc = (c[0] - b[0], c[1] - b[1])
     dot = ba[0]*bc[0] + ba[1]*bc[1]

@@ -1,0 +1,44 @@
+{
+    "quality": {
+        "label": "Poor",
+        "probabilities": {
+            "Poor": 0.2446,
+            "Average": 0.1373,
+            "Good": 0.6181
+        },
+        "confidence": 0.6181,
+        "model_used": "SVM",
+        "frame_count": 155,
+        "mean_features": {
+            "elbow_angle": 95.7191,
+            "spine_lean": 15.6709,
+            "head_over_knee": 0.0301,
+            "foot_direction": 124.8865
+        }
+    },
+    "shot_type": {
+        "shot_type": "Cover Drive",
+        "confidence": 0.4404,
+        "all_probabilities": {
+            "Cover Drive": 0.4404,
+            "Cut Shot": 0.1528,
+            "Leg Glance": 0.1497,
+            "Pull Shot": 0.257,
+            "Straight Drive": 0.0
+        },
+        "low_confidence": true,
+        "mean_features": {
+            "elbow_angle": 92.866,
+            "wrist_height": 0.859,
+            "hip_rotation": 27.432,
+            "knee_bend": 153.784,
+            "spine_lean": 17.218,
+            "foot_stance_width": 0.379,
+            "bat_plane": 50.627,
+            "weight_forward": 0.291
+        }
+    },
+    "frame_count": 162,
+    "avg_fps": 18.91,
+    "annotated_video_filename": "tmpdv2jiw6k_annotated.mp4"
+}

@@ -114,7 +114,7 @@ def generate_synthetic_dataset(
 
     os.makedirs(os.path.dirname(output_path) if os.path.dirname(output_path) else ".", exist_ok=True)
     df.to_csv(output_path, index=False)
-    print(f"[dataset_utils] Synthetic dataset ({len(df)} samples) saved → {output_path}")
+    print(f"[dataset_utils] Synthetic dataset ({len(df)} samples) saved -> {output_path}")
     print(df[LABEL_COL].value_counts().to_string())
     return df
 
@@ -131,7 +131,7 @@ def _noisy_float(rng, lo, hi, std):
 
 
 # ─────────────────────────────────────────────────────────────────────────────
-#  CSV → numpy arrays
+#  CSV -> numpy arrays
 # ─────────────────────────────────────────────────────────────────────────────
 
 def load_dataset(
@@ -233,7 +233,7 @@ def export_features_from_video(
                 LABEL_COL:        label,
             })
 
-    print(f"[dataset_utils] Exported {len(all_metrics)} frames for '{video_id}' → {output_path}")
+    print(f"[dataset_utils] Exported {len(all_metrics)} frames for '{video_id}' -> {output_path}")
 
 
 # ─────────────────────────────────────────────────────────────────────────────

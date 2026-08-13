@@ -35,7 +35,7 @@ Usage (inference)
 
     predictor = MLPredictor(model_path="models/best_model.pkl")
     result = predictor.predict_from_metrics(metrics_dict)
-    # result → {"label": "Good", "probabilities": {"Poor":0.05,"Average":0.10,"Good":0.85}}
+    # result -> {"label": "Good", "probabilities": {"Poor":0.05,"Average":0.10,"Good":0.85}}
 """
 
 from __future__ import annotations
@@ -97,7 +97,7 @@ class MLTrainer:
     # ── Model definitions ────────────────────────────────────────────────────
 
     def _build_pipelines(self) -> dict:
-        """Return a dict of name → sklearn Pipeline (un-fitted)."""
+        """Return a dict of name -> sklearn Pipeline (un-fitted)."""
         label_map = {c: i for i, c in enumerate(CLASSES)}
 
         svm = Pipeline([
@@ -162,7 +162,7 @@ class MLTrainer:
         verbose : bool
             Print training progress and results table.
         """
-        # Encode string labels → int for XGBoost compatibility
+        # Encode string labels -> int for XGBoost compatibility
         if isinstance(y[0], str):
             y_enc = self.label_encoder_.transform(y)
         else:
@@ -232,7 +232,7 @@ class MLTrainer:
 
         if verbose:
             print("\n" + "-" * 60)
-            print(f"  ★  Best model: {self.best_name_}  "
+            print(f"  *  Best model: {self.best_name_}  "
                   f"(test accuracy = {best_acc:.3f})")
             print("=" * 60 + "\n")
 
@@ -249,7 +249,7 @@ class MLTrainer:
                 "CV Accuracy":    round(cv["mean"], 4),
                 "CV Std":         round(cv["std"],  4),
                 "Test Accuracy":  round(test,       4),
-                "Best":           "★" if name == self.best_name_ else "",
+                "Best":           "*" if name == self.best_name_ else "",
             })
         return pd.DataFrame(rows).set_index("Model")
 
@@ -267,7 +267,7 @@ class MLTrainer:
             "classes":       CLASSES,
         }
         joblib.dump(bundle, path)
-        print(f"[MLTrainer] Best model ({self.best_name_}) saved → {path}")
+        print(f"[MLTrainer] Best model ({self.best_name_}) saved -> {path}")
 
     def save_all(self, directory: str = "models/") -> None:
         """Persist every trained model as a separate .pkl file."""
@@ -282,7 +282,7 @@ class MLTrainer:
                 "classes":       CLASSES,
             }
             joblib.dump(bundle, path)
-        print(f"[MLTrainer] All {len(self.models_)} models saved → {directory}")
+        print(f"[MLTrainer] All {len(self.models_)} models saved -> {directory}")
 
     def save_comparison_json(self, path: str = "output/model_comparison.json") -> None:
         """Write a JSON summary of all model metrics for the API / frontend."""
@@ -298,7 +298,7 @@ class MLTrainer:
             }
         with open(path, "w") as f:
             json.dump(summary, f, indent=4)
-        print(f"[MLTrainer] Comparison report saved → {path}")
+        print(f"[MLTrainer] Comparison report saved -> {path}")
 
 
 # ─────────────────────────────────────────────────────────────────────────────

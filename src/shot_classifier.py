@@ -3,7 +3,7 @@ shot_classifier.py  — FIXED VERSION
 =====================================
 Key fixes:
   1. Reads num_classes from the saved JSON (no more hardcoded 5)
-     → if your dataset has 4 or 6 folders, this still works correctly
+     -> if your dataset has 4 or 6 folders, this still works correctly
   2. Falls back gracefully when model file doesn't exist
   3. Added confidence threshold warning for low-confidence predictions
 """
@@ -60,7 +60,7 @@ class ShotClassifier:
         if os.path.exists(CLASS_MAP_PATH):
             with open(CLASS_MAP_PATH, "r", encoding="utf-8") as f:
                 classes = json.load(f)
-            # Strip numeric prefixes like "1. Cover Drive" → "Cover Drive"
+            # Strip numeric prefixes like "1. Cover Drive" -> "Cover Drive"
             return [c.split(". ", 1)[1] if ". " in c else c for c in classes]
 
         # Fallback — only used if JSON is missing

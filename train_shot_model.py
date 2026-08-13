@@ -100,7 +100,7 @@ def train():
     # Save class map for shot_classifier.py to load
     with open(CLASS_MAP_PATH, "w", encoding="utf-8") as f:
         json.dump(classes, f, ensure_ascii=False, indent=2)
-    print(f"[train] Class map saved → {CLASS_MAP_PATH}")
+    print(f"[train] Class map saved -> {CLASS_MAP_PATH}")
 
     model    = build_model(num_classes)
     device   = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -154,12 +154,12 @@ def train():
         if val_acc > best_val_acc:
             best_val_acc = val_acc
             torch.save(model.state_dict(), MODEL_PATH)
-            status = "✅ saved"
+            status = "* saved"
 
         print(f"{epoch:>6} {avg_loss:>11.4f} {val_acc:>8.2%} {status:>8}")
 
     print(f"\n[train] Best validation accuracy : {best_val_acc:.2%}")
-    print(f"[train] Model saved → {MODEL_PATH}")
+    print(f"[train] Model saved -> {MODEL_PATH}")
     print("\nYou can now run:  python main.py")
 
 

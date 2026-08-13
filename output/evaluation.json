@@ -1,22 +1,22 @@
 {
     "Footwork": {
-        "score": 0.40816494915736357,
+        "score": 6.63828959382354,
         "feedback": "Ensure your front foot points towards the cover region."
     },
     "Head Position": {
-        "score": 7.890917714633888,
+        "score": 8.898675967753306,
         "feedback": "Keep your head still and over your front knee for better balance."
     },
     "Swing Control": {
-        "score": 6.5837591505213835,
+        "score": 9.182538339104646,
         "feedback": "A high elbow is key to a good cover drive. Ensure a full swing."
     },
     "Balance": {
-        "score": 0.20244670924366132,
+        "score": 0.0,
         "feedback": "Maintain a stable base and good spine angle throughout the shot."
     },
     "Follow-through": {
-        "score": 8.312382338620125,
+        "score": 7.814450006000505,
         "feedback": "Complete your swing with a high and full follow-through."
     }
 }

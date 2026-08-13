@@ -1,4 +1,6 @@
 newenv/
 venv/
 __pycache__/
-*.pyc
+*.pycoutput/tmp*
+frontend/node_modules/
+frontend/dist/

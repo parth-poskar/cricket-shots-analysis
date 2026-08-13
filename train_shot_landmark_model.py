@@ -177,7 +177,7 @@ def generate_dataset(n_per_class: int = 300, seed: int = 42) -> pd.DataFrame:
     df = pd.DataFrame(rows).sample(frac=1, random_state=seed).reset_index(drop=True)
     os.makedirs(os.path.dirname(DATASET_PATH) if os.path.dirname(DATASET_PATH) else ".", exist_ok=True)
     df.to_csv(DATASET_PATH, index=False)
-    print(f"[train] Synthetic dataset ({len(df)} samples) → {DATASET_PATH}")
+    print(f"[train] Synthetic dataset ({len(df)} samples) -> {DATASET_PATH}")
     print(df["shot_type"].value_counts().to_string())
     return df
 
@@ -234,11 +234,15 @@ def train():
     from sklearn.metrics import classification_report
 
     # 1 ── Dataset
-    df = generate_dataset(n_per_class=600)  # more samples = more robust model
+    if os.path.exists(DATASET_PATH):
+        df = pd.read_csv(DATASET_PATH)
+        print(f"[train] Loaded user dataset -> {DATASET_PATH} with {len(df)} samples")
+    else:
+        df = generate_dataset(n_per_class=600)  # more samples = more robust model
     X     = df[FEATURE_COLS].values
     y_str = df["shot_type"].values   # string labels e.g. "Cover Drive"
 
-    # Encode strings → integers — XGBoost requires numeric labels
+    # Encode strings -> integers — XGBoost requires numeric labels
     le = LabelEncoder()
     y  = le.fit_transform(y_str)     # 0,1,2,3,4
     encoded_classes = list(le.classes_)
@@ -260,16 +264,16 @@ def train():
     print("-" * 38)
 
     for name, model in models.items():
-        scores = cross_val_score(model, X, y, cv=cv, scoring="accuracy", n_jobs=-1)
+        scores = cross_val_score(model, X, y, cv=cv, scoring="accuracy", n_jobs=1)
         results[name] = (scores.mean(), scores.std(), model)
         print(f"{name:<20} {scores.mean():.3f}   ±{scores.std():.3f}")
 
     # 3 ── Ensemble
     estimators = [(n, m) for n, (_, _, m) in results.items()]
     ensemble = VotingClassifier(estimators=estimators, voting="soft")
-    ens_scores = cross_val_score(ensemble, X, y, cv=cv, scoring="accuracy", n_jobs=-1)
+    ens_scores = cross_val_score(ensemble, X, y, cv=cv, scoring="accuracy", n_jobs=1)
     results["Ensemble"] = (ens_scores.mean(), ens_scores.std(), ensemble)
-    print(f"{'Ensemble':<20} {ens_scores.mean():.3f}   ±{ens_scores.std():.3f}  ★")
+    print(f"{'Ensemble':<20} {ens_scores.mean():.3f}   ±{ens_scores.std():.3f}  *")
 
     # 4 ── Pick best, fit on full data
     best_name  = max(results, key=lambda n: results[n][0])
@@ -285,9 +289,9 @@ def train():
         import json as _json
         _json.dump(encoded_classes, f, indent=2)
 
-    print(f"[train] Model saved        → {MODEL_PATH}")
-    print(f"[train] Label encoder saved→ {MODEL_PATH.replace('.pkl', '_label_encoder.pkl')}")
-    print(f"[train] Classes saved      → {CLASS_MAP_PATH}")
+    print(f"[train] Model saved        -> {MODEL_PATH}")
+    print(f"[train] Label encoder saved-> {MODEL_PATH.replace('.pkl', '_label_encoder.pkl')}")
+    print(f"[train] Classes saved      -> {CLASS_MAP_PATH}")
 
     # 6 ── Per-class accuracy report
     preds     = best_model.predict(X)
