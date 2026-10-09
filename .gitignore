@@ -9,3 +9,6 @@ venv/
 uploads/
 __pycache__/
 *.mp4
+
+data/users.json
+data/user_sessions.json
