@@ -1,0 +1,31 @@
+[
+  {
+    "id": "shot_low_conf_test",
+    "match_id": "match_190af98e02",
+    "shot_type": "Pull Shot",
+    "confidence": 0.35,
+    "quality_score": 55.0,
+    "queued_at": 1791534185,
+    "review_status": "reviewed",
+    "resolved_at": 1791534246,
+    "corrected_shot_type": "Hook Shot"
+  },
+  {
+    "id": "shot_low_conf_test",
+    "match_id": "match_b69f530dcc",
+    "shot_type": "Pull Shot",
+    "confidence": 0.35,
+    "quality_score": 55.0,
+    "queued_at": 1791534208,
+    "review_status": "pending"
+  },
+  {
+    "id": "shot_low_conf_test",
+    "match_id": "match_807b1577b6",
+    "shot_type": "Pull Shot",
+    "confidence": 0.35,
+    "quality_score": 55.0,
+    "queued_at": 1791534246,
+    "review_status": "pending"
+  }
+]

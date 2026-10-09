@@ -1,33 +1,23 @@
 """
 src/shot_landmark_classifier.py
 ================================
-Landmark-based cricket shot type classifier.
+Upgraded 10-Feature Landmark-Based Cricket Shot Type Classifier.
+Extracts 10 biomechanical features from MediaPipe 3D joint positions to accurately
+discriminate between subtle stroke variations (e.g. Straight Drive vs Cover Drive).
 
-Replaces the ResNet18 image classifier (shot_classifier.py) with a
-pose-landmark approach. Instead of looking at pixels, it computes 8
-biomechanical features from MediaPipe joint positions — features that
-are UNIQUE per shot type (cover drive vs cut shot have very different
-body geometry, even if the background looks the same).
-
-Features extracted
+Features extracted:
 ------------------
-  elbow_angle        — angle at the dominant elbow (swing mechanics)
-  wrist_height       — normalised wrist height relative to shoulder
-  hip_rotation       — horizontal hip-to-shoulder twist (rotation plane)
-  knee_bend          — front knee flexion (foot-work indicator)
-  spine_lean         — lean angle of the spine
-  foot_stance_width  — normalised feet separation (balance/stance)
-  bat_plane          — estimated swing plane angle (horizontal=0, vertical=90)
-  weight_forward     — 1.0 = all weight on front foot, 0.0 = back foot
-
-Usage
------
-  classifier = ShotLandmarkClassifier()
-  result = classifier.predict_from_landmarks(all_landmarks_per_frame)
-  # result = {"shot_type": "Cover Drive", "confidence": 0.87, ...}
-
-  # Or if you already have features from another module:
-  result = classifier.predict_from_features(feature_dict)
+  1. elbow_angle             — Lead elbow angle (swing mechanics & elevation)
+  2. wrist_height            — Normalised wrist height relative to shoulder-hip span
+  3. hip_rotation            — Horizontal hip-to-shoulder twist (rotation plane)
+  4. knee_bend               — Front knee flexion (weight transfer & stride)
+  5. spine_lean              — Lean angle of the spine from vertical plumb
+  6. foot_stance_width       — Normalised feet separation
+  7. bat_plane               — Estimated swing plane angle (horizontal=0, vertical=90)
+  8. weight_forward          — Ratio of weight shifted forward (0=back foot, 1=front foot)
+  9. wrist_centerline_offset — Lateral distance between wrist and head/nose center line
+                             (Straight Drive: < 0.06; Cover Drive: > 0.12)
+  10. foot_stride_angle      — Stride direction angle (0° = straight down pitch, 45° = extra cover)
 """
 
 from __future__ import annotations
@@ -43,9 +33,9 @@ import numpy as np
 MODEL_PATH     = "models/shot_landmark_model.pkl"
 CLASS_MAP_PATH = "models/shot_landmark_classes.json"
 
-LOW_CONFIDENCE_THRESHOLD = 0.45
+LOW_CONFIDENCE_THRESHOLD = 0.40
 
-# MediaPipe landmark indices we need
+# MediaPipe landmark indices
 _MP = {
     "nose":           0,
     "left_shoulder":  11, "right_shoulder": 12,
@@ -58,10 +48,19 @@ _MP = {
     "left_foot":      31, "right_foot":     32,
 }
 
+FEATURE_COLS = [
+    "elbow_angle",
+    "wrist_height",
+    "hip_rotation",
+    "knee_bend",
+    "spine_lean",
+    "foot_stance_width",
+    "bat_plane",
+    "weight_forward",
+    "wrist_centerline_offset",
+    "foot_stride_angle",
+]
 
-# ---------------------------------------------------------------------------
-# Geometry helpers
-# ---------------------------------------------------------------------------
 
 def _angle(a, b, c) -> float:
     """Angle (degrees) at vertex b, between rays b->a and b->c."""
@@ -80,20 +79,13 @@ def _pt(lm, idx) -> tuple[float, float]:
 
 def extract_features(landmarks) -> Optional[dict]:
     """
-    Extract 8 biomechanical features from a MediaPipe landmark list.
-
-    Parameters
-    ----------
-    landmarks : list of mediapipe NormalizedLandmark objects
-
-    Returns
-    -------
-    dict of 8 float features, or None if landmarks are missing/invalid
+    Extract 10 discriminating biomechanical features from a MediaPipe landmark list.
     """
     if landmarks is None or len(landmarks) < 33:
         return None
 
     try:
+        nose = _pt(landmarks, _MP["nose"])
         ls = _pt(landmarks, _MP["left_shoulder"])
         rs = _pt(landmarks, _MP["right_shoulder"])
         le = _pt(landmarks, _MP["left_elbow"])
@@ -106,31 +98,33 @@ def extract_features(landmarks) -> Optional[dict]:
         rk = _pt(landmarks, _MP["right_knee"])
         la = _pt(landmarks, _MP["left_ankle"])
         ra = _pt(landmarks, _MP["right_ankle"])
+        lf = _pt(landmarks, _MP["left_foot"])
+        rf = _pt(landmarks, _MP["right_foot"])
 
-        # Determine dominant side: wrist that is more horizontally extended
+        # Determine dominant lead side (based on wrist extension)
         left_ext  = abs(lw[0] - ls[0])
         right_ext = abs(rw[0] - rs[0])
         if left_ext >= right_ext:
             shoulder, elbow, wrist = ls, le, lw
+            front_ankle, front_foot = la, lf
         else:
             shoulder, elbow, wrist = rs, re, rw
+            front_ankle, front_foot = ra, rf
 
         # ── Feature 1: elbow_angle ───────────────────────────────────────────
         elbow_angle = _angle(shoulder, elbow, wrist)
 
         # ── Feature 2: wrist_height ──────────────────────────────────────────
-        # Normalised: 1.0 = wrist at shoulder level, 0.0 = wrist at hip
         hip_mid_y = (lh[1] + rh[1]) / 2
         sh_mid_y  = (ls[1] + rs[1]) / 2
         span      = abs(hip_mid_y - sh_mid_y) + 1e-9
         wrist_height = float(np.clip(1.0 - (wrist[1] - sh_mid_y) / span, 0.0, 1.5))
 
         # ── Feature 3: hip_rotation ──────────────────────────────────────────
-        # FIX: normalize angle difference to 0-180 range (was giving 350+ due to wrapping)
         sh_angle  = math.degrees(math.atan2(rs[1]-ls[1], rs[0]-ls[0]))
         hip_angle = math.degrees(math.atan2(rh[1]-lh[1], rh[0]-lh[0]))
         diff = abs(sh_angle - hip_angle) % 360
-        hip_rotation = min(diff, 360 - diff)   # always 0-180 now
+        hip_rotation = min(diff, 360 - diff)
 
         # ── Feature 4: knee_bend ─────────────────────────────────────────────
         left_knee_angle  = _angle(lh, lk, la)
@@ -138,8 +132,6 @@ def extract_features(landmarks) -> Optional[dict]:
         knee_bend = min(left_knee_angle, right_knee_angle)
 
         # ── Feature 5: spine_lean ────────────────────────────────────────────
-        # FIX: use abs(dy) so image-coord sign doesn't flip the result negative
-        # Result is 0 = perfectly upright, increases as player leans
         sh_mid  = ((ls[0]+rs[0])/2, (ls[1]+rs[1])/2)
         hip_mid = ((lh[0]+rh[0])/2, (lh[1]+rh[1])/2)
         dx = sh_mid[0] - hip_mid[0]
@@ -147,7 +139,6 @@ def extract_features(landmarks) -> Optional[dict]:
         spine_lean = math.degrees(math.atan2(abs(dx), abs(dy) + 1e-9))
 
         # ── Feature 6: foot_stance_width ─────────────────────────────────────
-        # FIX: hard clip to 0-3 to kill outlier frames where one foot is off-screen
         sh_width     = abs(rs[0] - ls[0]) + 1e-9
         stance_width = float(np.clip(abs(ra[0] - la[0]) / sh_width, 0.0, 3.0))
 
@@ -157,43 +148,40 @@ def extract_features(landmarks) -> Optional[dict]:
         bat_plane = abs(math.degrees(math.atan2(abs(dy2), abs(dx2) + 1e-9)))
 
         # ── Feature 8: weight_forward ────────────────────────────────────────
-        # FIX: was always 1.0 due to bad formula. Now uses front-knee bend as
-        # proxy — more bent front knee = more weight shifted forward (0-1 range)
-        front_knee   = min(left_knee_angle, right_knee_angle)
+        front_knee = min(left_knee_angle, right_knee_angle)
         weight_forward = float(np.clip(1.0 - (front_knee - 90.0) / 90.0, 0.0, 1.0))
 
+        # ── Feature 9: wrist_centerline_offset (KEY DISCRIMINATOR) ──────────
+        # Straight Drive hands pass directly through body centerline (nose/sternum)
+        # Cover Drive reaches laterally out towards the off side
+        wrist_centerline_offset = float(abs(wrist[0] - nose[0]))
+
+        # ── Feature 10: foot_stride_angle (KEY DISCRIMINATOR) ───────────────
+        # Measures front foot angle relative to vertical pitch line
+        dx_foot = front_foot[0] - front_ankle[0]
+        dy_foot = front_foot[1] - front_ankle[1]
+        foot_stride_angle = abs(math.degrees(math.atan2(abs(dx_foot), abs(dy_foot) + 1e-9)))
+
         return {
-            "elbow_angle":       elbow_angle,
-            "wrist_height":      wrist_height,
-            "hip_rotation":      hip_rotation,
-            "knee_bend":         knee_bend,
-            "spine_lean":        spine_lean,
-            "foot_stance_width": stance_width,
-            "bat_plane":         bat_plane,
-            "weight_forward":    weight_forward,
+            "elbow_angle":             float(elbow_angle),
+            "wrist_height":            float(wrist_height),
+            "hip_rotation":            float(hip_rotation),
+            "knee_bend":               float(knee_bend),
+            "spine_lean":              float(spine_lean),
+            "foot_stance_width":       float(stance_width),
+            "bat_plane":               float(bat_plane),
+            "weight_forward":          float(weight_forward),
+            "wrist_centerline_offset": float(wrist_centerline_offset),
+            "foot_stride_angle":       float(foot_stride_angle),
         }
 
     except Exception as e:
-        print(f"[ShotLandmarkClassifier] Feature extraction failed: {e}")
         return None
 
 
-FEATURE_COLS = [
-    "elbow_angle", "wrist_height", "hip_rotation", "knee_bend",
-    "spine_lean", "foot_stance_width", "bat_plane", "weight_forward",
-]
-
-
-# ---------------------------------------------------------------------------
-# Classifier
-# ---------------------------------------------------------------------------
-
 class ShotLandmarkClassifier:
     """
-    Landmark-based shot type classifier.
-
-    Load once, call predict_from_landmarks() per video.
-    Falls back gracefully if model file is missing.
+    10-Feature Landmark-based shot type classifier.
     """
 
     def __init__(self):
@@ -206,7 +194,6 @@ class ShotLandmarkClassifier:
         self.model   = joblib.load(MODEL_PATH)
         self.classes = self._load_classes()
 
-        # Load label encoder so numeric predictions decode back to shot names
         le_path = MODEL_PATH.replace(".pkl", "_label_encoder.pkl")
         self.label_encoder = joblib.load(le_path) if os.path.exists(le_path) else None
 
@@ -216,26 +203,9 @@ class ShotLandmarkClassifier:
         if os.path.exists(CLASS_MAP_PATH):
             with open(CLASS_MAP_PATH, "r", encoding="utf-8") as f:
                 return json.load(f)
-        # Fallback
         return ["Cover Drive", "Cut Shot", "Leg Glance", "Pull Shot", "Straight Drive"]
 
-    # ------------------------------------------------------------------
-
     def predict_from_landmarks(self, all_landmarks: list) -> dict:
-        """
-        Aggregate per-frame landmarks and predict the shot type.
-
-        Parameters
-        ----------
-        all_landmarks : list
-            Each element is the result of pose_estimator.get_landmarks(results),
-            i.e. a list of MediaPipe NormalizedLandmark objects (or None).
-
-        Returns
-        -------
-        dict with keys:
-          shot_type, confidence, all_probabilities, low_confidence, mean_features
-        """
         features_list = []
         for lm in all_landmarks:
             f = extract_features(lm)
@@ -257,24 +227,20 @@ class ShotLandmarkClassifier:
         return self._predict_array(X, mean_features)
 
     def predict_from_features(self, feature_dict: dict) -> dict:
-        """
-        Predict from a pre-computed feature dict (e.g. from ml_model pipeline).
-        """
         X = np.array([[feature_dict.get(k, 0.0) for k in FEATURE_COLS]])
         return self._predict_array(X, feature_dict)
 
     def _predict_array(self, X: np.ndarray, mean_features: dict) -> dict:
+        # Compatibility check: if old model trained on 8 features, slice X
+        if hasattr(self.model, "n_features_in_") and self.model.n_features_in_ == 8 and X.shape[1] > 8:
+            X = X[:, :8]
+
         proba = self.model.predict_proba(X)[0]
         idx   = int(np.argmax(proba))
 
         confidence     = float(proba[idx])
         low_confidence = confidence < LOW_CONFIDENCE_THRESHOLD
 
-        if low_confidence:
-            print(f"[ShotLandmarkClassifier] Low confidence ({confidence:.2%}) "
-                  "— consider adding more training data for this shot type.")
-
-        # Decode numeric index back to shot name via label encoder (or fallback to classes list)
         if self.label_encoder is not None:
             shot_name = self.label_encoder.inverse_transform([idx])[0]
             class_names = list(self.label_encoder.classes_)

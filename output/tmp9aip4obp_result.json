@@ -1,0 +1,44 @@
+{
+    "quality": {
+        "label": "Good",
+        "probabilities": {
+            "Poor": 0.2374,
+            "Average": 0.1306,
+            "Good": 0.632
+        },
+        "confidence": 0.97,
+        "model_used": "SVM",
+        "frame_count": 293,
+        "mean_features": {
+            "elbow_angle": 145.8064,
+            "spine_lean": 16.1127,
+            "head_over_knee": 0.0578,
+            "foot_direction": 19.6747
+        }
+    },
+    "shot_type": {
+        "shot_type": "Pull Shot",
+        "confidence": 0.3717,
+        "all_probabilities": {
+            "Cover Drive": 0.2344,
+            "Cut Shot": 0.2911,
+            "Leg Glance": 0.0694,
+            "Pull Shot": 0.3717,
+            "Straight Drive": 0.0333
+        },
+        "low_confidence": true,
+        "mean_features": {
+            "elbow_angle": 159.771,
+            "wrist_height": 0.781,
+            "hip_rotation": 4.842,
+            "knee_bend": 159.982,
+            "spine_lean": 7.309,
+            "foot_stance_width": 0.621,
+            "bat_plane": 23.567,
+            "weight_forward": 0.22
+        }
+    },
+    "frame_count": 484,
+    "avg_fps": 3.5,
+    "annotated_video_filename": "tmp9aip4obp_annotated.mp4"
+}

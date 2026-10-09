@@ -1,0 +1,519 @@
+{
+  "match_c58497caf0": [
+    {
+      "id": "shot_671bfb39",
+      "match_id": "match_c58497caf0",
+      "delivery_no": 5,
+      "shot_type": "Leg Glance",
+      "confidence": 0.83,
+      "quality_score": 90.5,
+      "quality_label": "Excellent",
+      "metrics": {
+        "elbow_angle": 125.0,
+        "spine_lean": 87.0,
+        "head_over_knee": 0.045,
+        "foot_direction": 110.0
+      },
+      "zone": "Fine Leg",
+      "source": "Demo Seeded",
+      "player_id": "usr_demo",
+      "timestamp": 1788785711,
+      "timestamp_ms": 1788785711043,
+      "latency_ms": null,
+      "corrected": false,
+      "corrected_shot_type": null,
+      "correction_note": ""
+    },
+    {
+      "id": "shot_42ad4e06",
+      "match_id": "match_c58497caf0",
+      "delivery_no": 4,
+      "shot_type": "Cut Shot",
+      "confidence": 0.78,
+      "quality_score": 82.0,
+      "quality_label": "Good",
+      "metrics": {
+        "elbow_angle": 120.0,
+        "spine_lean": 85.0,
+        "head_over_knee": 0.06,
+        "foot_direction": 95.0
+      },
+      "zone": "Point",
+      "source": "Demo Seeded",
+      "player_id": "usr_demo",
+      "timestamp": 1788785711,
+      "timestamp_ms": 1788785711025,
+      "latency_ms": null,
+      "corrected": false,
+      "corrected_shot_type": null,
+      "correction_note": ""
+    },
+    {
+      "id": "shot_62e65c4c",
+      "match_id": "match_c58497caf0",
+      "delivery_no": 3,
+      "shot_type": "Pull Shot",
+      "confidence": 0.87,
+      "quality_score": 88.0,
+      "quality_label": "Good",
+      "metrics": {
+        "elbow_angle": 115.0,
+        "spine_lean": 82.0,
+        "head_over_knee": 0.085,
+        "foot_direction": 78.0
+      },
+      "zone": "Mid-wicket",
+      "source": "Demo Seeded",
+      "player_id": "usr_demo",
+      "timestamp": 1788785711,
+      "timestamp_ms": 1788785711008,
+      "latency_ms": null,
+      "corrected": false,
+      "corrected_shot_type": null,
+      "correction_note": ""
+    },
+    {
+      "id": "shot_91994791",
+      "match_id": "match_c58497caf0",
+      "delivery_no": 2,
+      "shot_type": "Straight Drive",
+      "confidence": 0.91,
+      "quality_score": 96.0,
+      "quality_label": "Excellent",
+      "metrics": {
+        "elbow_angle": 142.5,
+        "spine_lean": 88.4,
+        "head_over_knee": 0.025,
+        "foot_direction": 89.0
+      },
+      "zone": "Straight",
+      "source": "Demo Seeded",
+      "player_id": "usr_demo",
+      "timestamp": 1788785710,
+      "timestamp_ms": 1788785710993,
+      "latency_ms": null,
+      "corrected": false,
+      "corrected_shot_type": null,
+      "correction_note": ""
+    },
+    {
+      "id": "shot_2b76da94",
+      "match_id": "match_c58497caf0",
+      "delivery_no": 1,
+      "shot_type": "Cover Drive",
+      "confidence": 0.94,
+      "quality_score": 94.5,
+      "quality_label": "Excellent",
+      "metrics": {
+        "elbow_angle": 138.2,
+        "spine_lean": 89.1,
+        "head_over_knee": 0.038,
+        "foot_direction": 91.5
+      },
+      "zone": "Off-side V",
+      "source": "Demo Seeded",
+      "player_id": "usr_demo",
+      "timestamp": 1788785710,
+      "timestamp_ms": 1788785710977,
+      "latency_ms": null,
+      "corrected": false,
+      "corrected_shot_type": null,
+      "correction_note": ""
+    }
+  ],
+  "match_4656e1ba41": [
+    {
+      "id": "shot_d4a31472",
+      "match_id": "match_4656e1ba41",
+      "delivery_no": 2,
+      "shot_type": "Straight Drive",
+      "confidence": 0.38,
+      "quality_score": 62.0,
+      "quality_label": "Average",
+      "metrics": {
+        "elbow_angle": 110.0,
+        "spine_lean": 15.0
+      },
+      "zone": "Straight",
+      "source": "live",
+      "player_id": "usr_demo",
+      "timestamp": 1791533953,
+      "timestamp_ms": 1791533953982,
+      "latency_ms": 160,
+      "corrected": true,
+      "corrected_shot_type": "On Drive",
+      "correction_note": "Reclassified by coach",
+      "corrected_at": 1791533954
+    },
+    {
+      "id": "shot_1497fb73",
+      "match_id": "match_4656e1ba41",
+      "delivery_no": 1,
+      "shot_type": "Cover Drive",
+      "confidence": 0.92,
+      "quality_score": 91.5,
+      "quality_label": "Excellent",
+      "metrics": {
+        "elbow_angle": 135.0,
+        "spine_lean": 28.0
+      },
+      "zone": "Off-side V",
+      "source": "live",
+      "player_id": "usr_demo",
+      "timestamp": 1791533953,
+      "timestamp_ms": 1791533953966,
+      "latency_ms": 142,
+      "corrected": false,
+      "corrected_shot_type": null,
+      "correction_note": ""
+    }
+  ],
+  "match_9393ee7f6a": [
+    {
+      "id": "shot_3646c29d",
+      "match_id": "match_9393ee7f6a",
+      "delivery_no": 2,
+      "shot_type": "Straight Drive",
+      "confidence": 0.38,
+      "quality_score": 62.0,
+      "quality_label": "Average",
+      "metrics": {
+        "elbow_angle": 110.0,
+        "spine_lean": 15.0
+      },
+      "zone": "Straight",
+      "source": "live",
+      "player_id": "usr_demo",
+      "timestamp": 1791533990,
+      "timestamp_ms": 1791533990091,
+      "latency_ms": 160,
+      "corrected": true,
+      "corrected_shot_type": "On Drive",
+      "correction_note": "Reclassified by coach",
+      "corrected_at": 1791533990
+    },
+    {
+      "id": "shot_e0381bce",
+      "match_id": "match_9393ee7f6a",
+      "delivery_no": 1,
+      "shot_type": "Cover Drive",
+      "confidence": 0.92,
+      "quality_score": 91.5,
+      "quality_label": "Excellent",
+      "metrics": {
+        "elbow_angle": 135.0,
+        "spine_lean": 28.0
+      },
+      "zone": "Off-side V",
+      "source": "live",
+      "player_id": "usr_demo",
+      "timestamp": 1791533990,
+      "timestamp_ms": 1791533990077,
+      "latency_ms": 142,
+      "corrected": false,
+      "corrected_shot_type": null,
+      "correction_note": ""
+    }
+  ],
+  "match_63ee86a8a6": [
+    {
+      "id": "shot_5ee6e4b1",
+      "match_id": "match_63ee86a8a6",
+      "delivery_no": 2,
+      "shot_type": "Straight Drive",
+      "confidence": 0.38,
+      "quality_score": 62.0,
+      "quality_label": "Average",
+      "metrics": {
+        "elbow_angle": 110.0,
+        "spine_lean": 15.0
+      },
+      "zone": "Straight",
+      "source": "live",
+      "player_id": "usr_demo",
+      "timestamp": 1791534058,
+      "timestamp_ms": 1791534058942,
+      "latency_ms": 160,
+      "corrected": true,
+      "corrected_shot_type": "On Drive",
+      "correction_note": "Reclassified by coach",
+      "corrected_at": 1791534058
+    },
+    {
+      "id": "shot_6d589a37",
+      "match_id": "match_63ee86a8a6",
+      "delivery_no": 1,
+      "shot_type": "Cover Drive",
+      "confidence": 0.92,
+      "quality_score": 91.5,
+      "quality_label": "Excellent",
+      "metrics": {
+        "elbow_angle": 135.0,
+        "spine_lean": 28.0
+      },
+      "zone": "Off-side V",
+      "source": "live",
+      "player_id": "usr_demo",
+      "timestamp": 1791534058,
+      "timestamp_ms": 1791534058927,
+      "latency_ms": 142,
+      "corrected": false,
+      "corrected_shot_type": null,
+      "correction_note": ""
+    }
+  ],
+  "match_74163c801b": [
+    {
+      "id": "shot_55faadf4",
+      "match_id": "match_74163c801b",
+      "delivery_no": 2,
+      "shot_type": "Straight Drive",
+      "confidence": 0.38,
+      "quality_score": 62.0,
+      "quality_label": "Average",
+      "metrics": {
+        "elbow_angle": 110.0,
+        "spine_lean": 15.0
+      },
+      "zone": "Straight",
+      "source": "live",
+      "player_id": "usr_demo",
+      "timestamp": 1791534150,
+      "timestamp_ms": 1791534150068,
+      "latency_ms": 160,
+      "corrected": true,
+      "corrected_shot_type": "On Drive",
+      "correction_note": "Reclassified by coach",
+      "corrected_at": 1791534150
+    },
+    {
+      "id": "shot_3fc5e4e4",
+      "match_id": "match_74163c801b",
+      "delivery_no": 1,
+      "shot_type": "Cover Drive",
+      "confidence": 0.92,
+      "quality_score": 91.5,
+      "quality_label": "Excellent",
+      "metrics": {
+        "elbow_angle": 135.0,
+        "spine_lean": 28.0
+      },
+      "zone": "Off-side V",
+      "source": "live",
+      "player_id": "usr_demo",
+      "timestamp": 1791534150,
+      "timestamp_ms": 1791534150056,
+      "latency_ms": 142,
+      "corrected": false,
+      "corrected_shot_type": null,
+      "correction_note": ""
+    }
+  ],
+  "match_190af98e02": [
+    {
+      "id": "shot_08d62d2b",
+      "match_id": "match_190af98e02",
+      "delivery_no": 2,
+      "shot_type": "Straight Drive",
+      "confidence": 0.38,
+      "quality_score": 62.0,
+      "quality_label": "Average",
+      "metrics": {
+        "elbow_angle": 110.0,
+        "spine_lean": 15.0
+      },
+      "zone": "Straight",
+      "source": "live",
+      "player_id": "usr_demo",
+      "timestamp": 1791534185,
+      "timestamp_ms": 1791534185140,
+      "latency_ms": 160,
+      "corrected": true,
+      "corrected_shot_type": "On Drive",
+      "correction_note": "Reclassified by coach",
+      "corrected_at": 1791534185
+    },
+    {
+      "id": "shot_1e35429b",
+      "match_id": "match_190af98e02",
+      "delivery_no": 1,
+      "shot_type": "Cover Drive",
+      "confidence": 0.92,
+      "quality_score": 91.5,
+      "quality_label": "Excellent",
+      "metrics": {
+        "elbow_angle": 135.0,
+        "spine_lean": 28.0
+      },
+      "zone": "Off-side V",
+      "source": "live",
+      "player_id": "usr_demo",
+      "timestamp": 1791534185,
+      "timestamp_ms": 1791534185128,
+      "latency_ms": 142,
+      "corrected": false,
+      "corrected_shot_type": null,
+      "correction_note": ""
+    }
+  ],
+  "match_4dd337f644": [
+    {
+      "id": "shot_a630c1a5",
+      "match_id": "match_4dd337f644",
+      "delivery_no": 1,
+      "shot_type": "Cut Shot",
+      "confidence": 0.88,
+      "quality_score": 85.0,
+      "quality_label": "Good",
+      "metrics": {},
+      "zone": "Unknown",
+      "source": "live",
+      "player_id": "usr_demo",
+      "timestamp": 1791534185,
+      "timestamp_ms": 1791534185258,
+      "latency_ms": null,
+      "corrected": true,
+      "corrected_shot_type": "Late Cut",
+      "correction_note": "Adjusted",
+      "corrected_at": 1791534185
+    }
+  ],
+  "match_b69f530dcc": [
+    {
+      "id": "shot_c8447bda",
+      "match_id": "match_b69f530dcc",
+      "delivery_no": 2,
+      "shot_type": "Straight Drive",
+      "confidence": 0.38,
+      "quality_score": 62.0,
+      "quality_label": "Average",
+      "metrics": {
+        "elbow_angle": 110.0,
+        "spine_lean": 15.0
+      },
+      "zone": "Straight",
+      "source": "live",
+      "player_id": "usr_demo",
+      "timestamp": 1791534208,
+      "timestamp_ms": 1791534208157,
+      "latency_ms": 160,
+      "corrected": true,
+      "corrected_shot_type": "On Drive",
+      "correction_note": "Reclassified by coach",
+      "corrected_at": 1791534208
+    },
+    {
+      "id": "shot_58a9fc70",
+      "match_id": "match_b69f530dcc",
+      "delivery_no": 1,
+      "shot_type": "Cover Drive",
+      "confidence": 0.92,
+      "quality_score": 91.5,
+      "quality_label": "Excellent",
+      "metrics": {
+        "elbow_angle": 135.0,
+        "spine_lean": 28.0
+      },
+      "zone": "Off-side V",
+      "source": "live",
+      "player_id": "usr_demo",
+      "timestamp": 1791534208,
+      "timestamp_ms": 1791534208139,
+      "latency_ms": 142,
+      "corrected": false,
+      "corrected_shot_type": null,
+      "correction_note": ""
+    }
+  ],
+  "match_55df489f72": [
+    {
+      "id": "shot_100d8219",
+      "match_id": "match_55df489f72",
+      "delivery_no": 1,
+      "shot_type": "Cut Shot",
+      "confidence": 0.88,
+      "quality_score": 85.0,
+      "quality_label": "Good",
+      "metrics": {},
+      "zone": "Unknown",
+      "source": "live",
+      "player_id": "usr_demo",
+      "timestamp": 1791534208,
+      "timestamp_ms": 1791534208252,
+      "latency_ms": null,
+      "corrected": true,
+      "corrected_shot_type": "Late Cut",
+      "correction_note": "Adjusted",
+      "corrected_at": 1791534208
+    }
+  ],
+  "match_807b1577b6": [
+    {
+      "id": "shot_50d79eef",
+      "match_id": "match_807b1577b6",
+      "delivery_no": 2,
+      "shot_type": "Straight Drive",
+      "confidence": 0.38,
+      "quality_score": 62.0,
+      "quality_label": "Average",
+      "metrics": {
+        "elbow_angle": 110.0,
+        "spine_lean": 15.0
+      },
+      "zone": "Straight",
+      "source": "live",
+      "player_id": "usr_demo",
+      "timestamp": 1791534246,
+      "timestamp_ms": 1791534246654,
+      "latency_ms": 160,
+      "corrected": true,
+      "corrected_shot_type": "On Drive",
+      "correction_note": "Reclassified by coach",
+      "corrected_at": 1791534246
+    },
+    {
+      "id": "shot_95144bbf",
+      "match_id": "match_807b1577b6",
+      "delivery_no": 1,
+      "shot_type": "Cover Drive",
+      "confidence": 0.92,
+      "quality_score": 91.5,
+      "quality_label": "Excellent",
+      "metrics": {
+        "elbow_angle": 135.0,
+        "spine_lean": 28.0
+      },
+      "zone": "Off-side V",
+      "source": "live",
+      "player_id": "usr_demo",
+      "timestamp": 1791534246,
+      "timestamp_ms": 1791534246638,
+      "latency_ms": 142,
+      "corrected": false,
+      "corrected_shot_type": null,
+      "correction_note": ""
+    }
+  ],
+  "match_009288114d": [
+    {
+      "id": "shot_274c29bc",
+      "match_id": "match_009288114d",
+      "delivery_no": 1,
+      "shot_type": "Cut Shot",
+      "confidence": 0.88,
+      "quality_score": 85.0,
+      "quality_label": "Good",
+      "metrics": {},
+      "zone": "Unknown",
+      "source": "live",
+      "player_id": "usr_demo",
+      "timestamp": 1791534246,
+      "timestamp_ms": 1791534246745,
+      "latency_ms": null,
+      "corrected": true,
+      "corrected_shot_type": "Late Cut",
+      "correction_note": "Adjusted",
+      "corrected_at": 1791534246
+    }
+  ]
+}

@@ -13,7 +13,7 @@ except:
     mp_pose = None
 
 from src.frame_extractor import extract_frames
-from src.shot_classifier import ShotClassifier
+# from src.shot_classifier import ShotClassifier  # Legacy ResNet18 classifier (superseded by landmark classifier)
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 

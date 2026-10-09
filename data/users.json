@@ -1,0 +1,14 @@
+{
+    "demo": {
+        "id": "usr_demo",
+        "username": "demo",
+        "email": "cricketer@cricpose.ai",
+        "full_name": "Rohit Sharma (Demo)",
+        "password_hash": "61775a47a8a5cd0db6ce0854f53f996221c8b1b5c366db72c8a80db2c3300fc6",
+        "salt": "02f18446142955171cb54cb2e4c2386d",
+        "batting_style": "Top Order Batsman",
+        "handedness": "Right-Handed",
+        "skill_level": "Professional",
+        "created_at": 1787768549
+    }
+}

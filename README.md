@@ -1,15 +1,50 @@
-# 🏏 AI-Powered Cricket Shot Analysis System
+# 🏏 CricPose AI — TV Broadcast Live Camera Cricket Analysis System
 
-A comprehensive Python-based cricket shot analysis platform that leverages **computer vision**, **pose estimation**, and **machine learning** to analyze and evaluate cricket shots in detail. The system processes video files, detects human pose landmarks using MediaPipe, computes biomechanical metrics, classifies shot types using deep learning, and predicts shot quality using an ensemble of supervised ML models.
+A state-of-the-art cricket biomechanical analysis and live broadcasting platform powered by **MediaPipe Pose Computer Vision**, **Biomechanical Metric Telemetry**, and **Machine Learning Shot Classification**.
+
+The system operates both in **🔴 On-Air Live Broadcast Mode** (real-time camera feed with Star Sports / Hawk-Eye style TV graphics) and **📁 Video Analysis Mode** (frame-by-frame deep biomechanical breakdown).
 
 **Key Features:**
-- 🎬 Real-time video processing with pose estimation
-- 📊 Biomechanical metrics extraction (angles, balance, footwork)
-- 🤖 Multi-model ML ensemble for shot quality prediction
-- 🎯 Shot-type classification (Cover Drive, Pull Shot, Straight Drive, etc.)
-- 📈 Detailed per-aspect evaluation and feedback
-- 🌐 FastAPI backend with REST endpoints
-- 🎨 Real-time skeleton overlay and metric visualization
+- 🔴 **TV Broadcast Live Camera Studio**: Real-time camera streaming with Hawk-Eye style HUD telemetry, live angle meters, and dynamic coaching commentary ticker.
+- ⚡ **Ultra-Low Latency WebSockets (`/ws/live-feed`)**: 30+ FPS bi-directional video stream between browser webcam and FastAPI AI engine.
+- 📸 **"Snap & Breakdown" Instant Analysis**: Freeze-frame stroke snapshot with instant technique scorecard modal.
+- 🖥️ **Standalone Desktop Live Broadcaster (`live_broadcast.py`)**: Direct OpenCV camera window with broadcast graphics & hotkey controls.
+- 📊 **Biomechanical Angles Extraction**: 33-point pose landmark estimation for Lead Elbow Extension, Spine Posture Lean, Head-over-Front-Knee Balance, and Foot Stride Alignment.
+- 🎯 **Landmark Shot-Type Classifier**: Real-time classification for Cover Drive, Straight Drive, Pull Shot, Cut Shot, and Leg Glance.
+- 🤖 **ML Technique Quality Evaluator**: Real-time shot scoring & coaching recommendations.
+- 🌐 **Modern Glassmorphic Web App**: Built with vanilla CSS & dark neon aesthetics.
+
+---
+
+## 🚀 Quick Start — Running Live Broadcast Mode
+
+### Option A: Launch Web Live Broadcast Studio (Recommended)
+```bash
+# 1. Start the FastAPI Broadcast Server
+.\venv\Scripts\python.exe -m uvicorn backend.app:app --host 0.0.0.0 --port 8000 --reload
+
+# 2. Open your browser:
+# http://localhost:8000/
+```
+In the browser:
+- Click **"🔴 Start Live Broadcast"** to activate your webcam with real-time TV HUD telemetry, glowing skeletal joint tracking, and live stroke classification!
+- Click **"📸 Snap & Breakdown"** to capture and analyze your stroke instantaneously.
+
+---
+
+### Option B: Standalone Desktop Camera Window
+```bash
+# Run directly with your connected webcam / capture card:
+.\venv\Scripts\python.exe live_broadcast.py
+
+# Or specify a different camera index / resolution:
+.\venv\Scripts\python.exe live_broadcast.py --camera 0 --width 1280 --height 720
+```
+**Desktop Controls:**
+- `[SPACE]` / `[S]`: Save high-resolution stroke snapshot & export analysis JSON
+- `[H]`: Toggle HUD telemetry graphics (Clean TV Feed vs Full Graphics)
+- `[R]`: Record 5-second live stroke video burst
+- `[Q]` / `[ESC]`: Quit broadcast window
 
 ---
 

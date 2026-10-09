@@ -1,0 +1,49 @@
+{
+    "usr_demo": [
+        {
+            "id": "sess_001",
+            "timestamp": 1787595749,
+            "shot_type": "Cover Drive",
+            "quality_score": 94.5,
+            "quality_label": "Excellent",
+            "source": "virat kohli.mp4",
+            "metrics": {
+                "elbow_angle": 138.2,
+                "spine_lean": 89.1,
+                "head_over_knee": 0.038,
+                "foot_direction": 91.5
+            },
+            "feedback": "Flawless front-foot stride with optimal high lead elbow elevation."
+        },
+        {
+            "id": "sess_002",
+            "timestamp": 1787682149,
+            "shot_type": "Straight Drive",
+            "quality_score": 96.0,
+            "quality_label": "Excellent",
+            "source": "1.1.mp4",
+            "metrics": {
+                "elbow_angle": 142.5,
+                "spine_lean": 88.4,
+                "head_over_knee": 0.025,
+                "foot_direction": 89.0
+            },
+            "feedback": "Perfect vertical swing plane directly under the eyes."
+        },
+        {
+            "id": "sess_003",
+            "timestamp": 1787754149,
+            "shot_type": "Pull Shot",
+            "quality_score": 88.0,
+            "quality_label": "Good",
+            "source": "Live Camera Feed",
+            "metrics": {
+                "elbow_angle": 115.0,
+                "spine_lean": 82.0,
+                "head_over_knee": 0.085,
+                "foot_direction": 78.0
+            },
+            "feedback": "Quick back-foot transfer with solid horizontal extension."
+        }
+    ]
+}

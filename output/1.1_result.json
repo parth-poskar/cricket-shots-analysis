@@ -1,44 +1,44 @@
 {
     "quality": {
-        "label": "Poor",
+        "label": "Good",
         "probabilities": {
-            "Poor": 0.2444,
-            "Average": 0.1431,
+            "Poor": 0.2453,
+            "Average": 0.1422,
             "Good": 0.6125
         },
-        "confidence": 0.6125,
+        "confidence": 0.979,
         "model_used": "SVM",
         "frame_count": 392,
         "mean_features": {
-            "elbow_angle": 129.1841,
-            "spine_lean": 55.5677,
-            "head_over_knee": 0.2085,
-            "foot_direction": 156.4995
+            "elbow_angle": 119.8499,
+            "spine_lean": 50.427,
+            "head_over_knee": 0.197,
+            "foot_direction": 153.6305
         }
     },
     "shot_type": {
         "shot_type": "Cover Drive",
-        "confidence": 0.8502,
+        "confidence": 0.9109,
         "all_probabilities": {
-            "Cover Drive": 0.8502,
-            "Cut Shot": 0.0173,
-            "Leg Glance": 0.0352,
-            "Pull Shot": 0.0134,
-            "Straight Drive": 0.0839
+            "Cover Drive": 0.9109,
+            "Cut Shot": 0.0033,
+            "Leg Glance": 0.0479,
+            "Pull Shot": 0.0,
+            "Straight Drive": 0.0378
         },
         "low_confidence": false,
         "mean_features": {
-            "elbow_angle": 103.65,
-            "wrist_height": 0.833,
-            "hip_rotation": 13.948,
-            "knee_bend": 119.917,
-            "spine_lean": 56.408,
-            "foot_stance_width": 0.633,
-            "bat_plane": 22.665,
-            "weight_forward": 0.662
+            "elbow_angle": 127.602,
+            "wrist_height": 0.679,
+            "hip_rotation": 12.77,
+            "knee_bend": 122.487,
+            "spine_lean": 52.822,
+            "foot_stance_width": 0.578,
+            "bat_plane": 33.974,
+            "weight_forward": 0.636
         }
     },
     "frame_count": 392,
-    "avg_fps": 26.86,
+    "avg_fps": 23.02,
     "annotated_video_filename": "1.1_annotated.mp4"
 }

@@ -1,8 +1,7 @@
 import cv2
 import os
-import yt_dlp
-
 def download_video(url, output_path):
+    import yt_dlp
     if os.path.exists(output_path):
         print("Video already exists.")
         return
