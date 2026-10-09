@@ -12,3 +12,6 @@ __pycache__/
 
 data/users.json
 data/user_sessions.json
+
+data/users.json
+data/user_sessions.json
