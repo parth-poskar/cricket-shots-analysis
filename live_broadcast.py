@@ -49,14 +49,37 @@ def get_shot_classifier():
         return None
 
 
-def run_live_broadcast(camera_id=0, width=1280, height=720, fps=30):
+def format_droidcam_url(target: str) -> str:
+    """Normalize user-provided DroidCam host or IP into a valid video stream URL."""
+    target = target.strip()
+    if target.startswith("http://") or target.startswith("https://"):
+        return target
+    if ":" in target:
+        host, port = target.split(":", 1)
+        return f"http://{host}:{port}/video"
+    return f"http://{target}:4747/video"
+
+
+def run_live_broadcast(camera_id=0, width=1280, height=720, fps=30, mirror=None):
     print("=" * 65)
     print("  🏏 CRICPOSE AI — TV BROADCAST LIVE CAMERA STUDIO")
     print("=" * 65)
-    print(f"[*] Initializing camera device index: {camera_id}")
+
+    is_network_stream = isinstance(camera_id, str)
+    if is_network_stream:
+        print(f"[*] Connecting to IP / DroidCam stream: {camera_id}")
+    else:
+        print(f"[*] Initializing camera device index: {camera_id}")
+
+    # Set mirror default: False for external/phone cameras, True for local selfie webcam
+    if mirror is None:
+        mirror = False if is_network_stream or camera_id != 0 else True
+
+    print(f"[*] Horizontal Mirroring: {'ON (Webcam Selfie View)' if mirror else 'OFF (Natural Match View)'}")
     print("[*] Controls:")
     print("    [SPACE] / [S] : Save stroke snapshot & analysis report")
     print("    [H]           : Toggle HUD telemetry graphics")
+    print("    [M]           : Toggle Mirror view (Switch Selfie / External)")
     print("    [R]           : Record 5-second stroke clip")
     print("    [Q] / [ESC]   : Exit live broadcast")
     print("-" * 65)
@@ -67,16 +90,23 @@ def run_live_broadcast(camera_id=0, width=1280, height=720, fps=30):
     cap = cv2.VideoCapture(camera_id)
     if not cap.isOpened():
         print(f"[-] ERROR: Could not open camera source [{camera_id}].")
-        print("    Please ensure your webcam is connected or try '--camera 1'.")
+        if is_network_stream:
+            print("    Tips for DroidCam:")
+            print("    1. Ensure phone and PC are connected to the same Wi-Fi network.")
+            print("    2. Confirm DroidCam app is open on your phone.")
+            print(f"    3. Verify the IP & Port shown on your phone match: {camera_id}")
+        else:
+            print("    Please ensure your webcam is connected or try '--camera 1'.")
         return
 
-    # Set requested resolution
-    cap.set(cv2.CAP_PROP_FRAME_WIDTH, width)
-    cap.set(cv2.CAP_PROP_FRAME_HEIGHT, height)
-    cap.set(cv2.CAP_PROP_FPS, fps)
+    # Set requested resolution (applies to hardware webcams)
+    if not is_network_stream:
+        cap.set(cv2.CAP_PROP_FRAME_WIDTH, width)
+        cap.set(cv2.CAP_PROP_FRAME_HEIGHT, height)
+        cap.set(cv2.CAP_PROP_FPS, fps)
 
-    actual_w = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
-    actual_h = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+    actual_w = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH)) or width
+    actual_h = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT)) or height
     print(f"[+] Camera feed active: {actual_w}x{actual_h} @ {fps} FPS")
 
     # Initialize AI Engines
@@ -101,17 +131,24 @@ def run_live_broadcast(camera_id=0, width=1280, height=720, fps=30):
     cv2.resizeWindow(window_name, actual_w, actual_h)
 
     frame_idx = 0
+    consecutive_empty_frames = 0
 
     try:
         while cap.isOpened():
             ret, frame = cap.read()
-            if not ret:
-                print("[-] Failed to grab frame from camera.")
+            if not ret or frame is None:
+                consecutive_empty_frames += 1
+                if is_network_stream and consecutive_empty_frames < 30:
+                    time.sleep(0.03)
+                    continue
+                print("[-] Failed to grab frame from camera stream.")
                 break
 
+            consecutive_empty_frames = 0
             frame_idx += 1
-            # Mirror horizontally for natural webcam self-view
-            display_frame = cv2.flip(frame, 1)
+
+            # Flip if mirroring is enabled
+            display_frame = cv2.flip(frame, 1) if mirror else frame.copy()
 
             # 1. Pose Tracking
             processed_img, results = pose_estimator.process_frame(display_frame)
@@ -169,6 +206,9 @@ def run_live_broadcast(camera_id=0, width=1280, height=720, fps=30):
             elif key == ord('h') or key == ord('H'):
                 show_hud = not show_hud
                 print(f"[*] HUD Overlays: {'ON' if show_hud else 'OFF (Clean Feed)'}")
+            elif key == ord('m') or key == ord('M'):
+                mirror = not mirror
+                print(f"[*] Mirror mode toggled: {'ON' if mirror else 'OFF'}")
             elif key == ord('s') or key == ord('S') or key == 32:  # 's' or SPACE
                 # Save snapshot + JSON report
                 ts = int(time.time())
@@ -207,14 +247,29 @@ def run_live_broadcast(camera_id=0, width=1280, height=720, fps=30):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="CricPose AI Live TV Broadcast Application")
-    parser.add_argument("--camera", type=str, default="0", 
+    parser.add_argument("--camera", type=str, default=None, 
                         help="Camera device index (e.g. 0, 1, 2) or IP Webcam URL (e.g. http://192.168.1.50:8080/video)")
+    parser.add_argument("--droidcam", type=str, default=None,
+                        help="DroidCam Phone IP or Host (e.g. 192.168.1.45 or 192.168.1.45:4747)")
     parser.add_argument("--width", type=int, default=1280, help="Stream width (default: 1280)")
     parser.add_argument("--height", type=int, default=720, help="Stream height (default: 720)")
     parser.add_argument("--fps", type=int, default=30, help="Stream FPS target (default: 30)")
+    parser.add_argument("--mirror", action="store_true", default=None, help="Force mirror view (horizontal flip)")
+    parser.add_argument("--no-mirror", dest="mirror", action="store_false", help="Disable mirror view")
     args = parser.parse_args()
 
-    # Parse camera input: if all digits, treat as integer device index; otherwise treat as stream URL
-    camera_source = int(args.camera) if args.camera.isdigit() else args.camera
+    # Determine camera source
+    if args.droidcam:
+        camera_source = format_droidcam_url(args.droidcam)
+    elif args.camera is not None:
+        camera_source = int(args.camera) if args.camera.isdigit() else args.camera
+    else:
+        camera_source = 0
 
-    run_live_broadcast(camera_id=camera_source, width=args.width, height=args.height, fps=args.fps)
+    run_live_broadcast(
+        camera_id=camera_source,
+        width=args.width,
+        height=args.height,
+        fps=args.fps,
+        mirror=args.mirror
+    )
