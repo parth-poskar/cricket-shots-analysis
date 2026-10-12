@@ -1,0 +1,1926 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cricket Live Shot Analysis — CricPose AI Dashboard</title>
+  <meta name="description" content="Real-time cricket shot detection, classification and biomechanical analytics dashboard for coaches, analysts, broadcasters and players.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/css/tokens.css">
+  <link rel="stylesheet" href="css/tokens.css">
+  <style>
+    @import url('/static/css/tokens.css');
+    @import url('css/tokens.css');
+
+    :root {
+      --bg-base: #070A12;
+      --bg-surface: rgba(15, 20, 36, 0.72);
+      --bg-card: rgba(255, 255, 255, 0.07);
+      --bg-card-hover: rgba(255, 255, 255, 0.12);
+      --border-color: rgba(255, 255, 255, 0.14);
+      --border-focus: rgba(34, 229, 139, 0.5);
+      --primary: #22E58B;
+      --primary-glow: rgba(34, 229, 139, 0.4);
+      --accent: #00F0FF;
+      --gold: #f59e0b;
+      --red: #ef4444;
+      --purple: #8b5cf6;
+      --orange: #f97316;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --radius-lg: 20px;
+      --radius-md: 12px;
+      --radius-sm: 8px;
+      --shadow-main: 0 16px 45px -8px rgba(0, 0, 0, 0.65);
+      --sidebar-width: 268px;
+    }
+    * { margin:0; padding:0; box-sizing:border-box; font-family:'Outfit',sans-serif; }
+    body {
+      background-color: var(--bg-base);
+      background-image:
+        radial-gradient(at 15% 10%, rgba(34, 229, 139, 0.12) 0px, transparent 45%),
+        radial-gradient(at 85% 15%, rgba(0, 240, 255, 0.10) 0px, transparent 45%),
+        radial-gradient(at 50% 90%, rgba(139, 92, 246, 0.08) 0px, transparent 50%);
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      position: relative;
+      overflow-x: hidden;
+    }
+    #appRoot {
+      display: flex;
+      width: 100%;
+      min-height: 100vh;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* ── Utility .glass Class & Fallbacks ─────────────────────────────── */
+    .glass {
+      background: rgba(20, 24, 45, 0.85); /* Solid translucent fallback */
+      background: rgba(255, 255, 255, 0.08);
+      backdrop-filter: blur(20px) saturate(140%);
+      -webkit-backdrop-filter: blur(20px) saturate(140%);
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      border-radius: 20px;
+    }
+    @supports not (backdrop-filter: blur(20px)) {
+      .glass,
+      .auth-box,
+      .card,
+      .stat-card,
+      .sidebar,
+      .topbar,
+      .modal-box {
+        background: rgba(20, 24, 45, 0.85) !important;
+      }
+    }
+
+    /* ── Ambient Glowing Orbs ─────────────────────────────────────────── */
+    .ambient-orbs-container {
+      position: fixed; inset: 0;
+      overflow: hidden; pointer-events: none;
+      z-index: 0;
+    }
+    .orb {
+      position: absolute; border-radius: 50%;
+      pointer-events: none; opacity: 0.45;
+      filter: blur(95px);
+      animation: orb-drift 20s ease-in-out infinite alternate;
+    }
+    .orb-1 {
+      width: 500px; height: 500px;
+      background: radial-gradient(circle, rgba(34, 229, 139, 0.35) 0%, rgba(34, 229, 139, 0) 70%);
+      top: -100px; left: 15%;
+    }
+    .orb-2 {
+      width: 550px; height: 550px;
+      background: radial-gradient(circle, rgba(0, 240, 255, 0.28) 0%, rgba(0, 240, 255, 0) 70%);
+      bottom: 2%; right: -80px;
+      animation-delay: -7s;
+    }
+    .orb-3 {
+      width: 420px; height: 420px;
+      background: radial-gradient(circle, rgba(139, 92, 246, 0.22) 0%, rgba(139, 92, 246, 0) 70%);
+      top: 45%; left: 50%;
+      animation-delay: -13s;
+    }
+    @keyframes orb-drift {
+      0% { transform: translate3d(0, 0, 0) scale(1); }
+      50% { transform: translate3d(30px, 40px, 0) scale(1.06); }
+      100% { transform: translate3d(-25px, 20px, 0) scale(0.95); }
+    }
+
+    /* ── Auth / Login Overlay ─────────────────────────────────────────── */
+    #authOverlay {
+      position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(5, 8, 16, 0.78);
+      backdrop-filter: blur(28px) saturate(140%);
+      -webkit-backdrop-filter: blur(28px) saturate(140%);
+      display: flex; align-items: center; justify-content: center;
+      z-index: 9999; padding: 1.5rem;
+    }
+    .auth-orb {
+      position: absolute; width: 440px; height: 440px;
+      background: radial-gradient(circle, rgba(34, 229, 139, 0.35) 0%, rgba(0, 240, 255, 0.15) 45%, transparent 70%);
+      filter: blur(60px); pointer-events: none; z-index: 1;
+      animation: pulse-auth-orb 8s ease-in-out infinite alternate;
+    }
+    @keyframes pulse-auth-orb {
+      0% { transform: scale(0.95) translate(-10px, -10px); opacity: 0.7; }
+      100% { transform: scale(1.1) translate(10px, 10px); opacity: 0.95; }
+    }
+    .auth-box {
+      background: rgba(20, 24, 45, 0.85); /* Solid translucent fallback */
+      background: rgba(255, 255, 255, 0.08);
+      backdrop-filter: blur(20px) saturate(140%);
+      -webkit-backdrop-filter: blur(20px) saturate(140%);
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      border-radius: 20px;
+      width: 100%; max-width: 460px;
+      padding: 2.5rem;
+      box-shadow: 0 25px 60px rgba(0, 0, 0, 0.75), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+      position: relative; z-index: 2;
+    }
+    .auth-brand { text-align: center; margin-bottom: 1.85rem; }
+    .auth-brand-icon {
+      width: 58px; height: 58px;
+      background: linear-gradient(135deg, var(--primary), var(--accent));
+      border-radius: 16px; display: inline-flex; align-items: center;
+      justify-content: center; font-size: 1.9rem;
+      box-shadow: 0 0 32px var(--primary-glow); margin-bottom: 0.85rem;
+      border: 1px solid rgba(255, 255, 255, 0.25);
+    }
+    .auth-brand h2 {
+      font-size: 1.8rem; font-weight: 800; letter-spacing: -0.5px;
+      background: linear-gradient(135deg, #ffffff 40%, var(--primary) 100%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+    .auth-tabs {
+      display: flex; gap: .4rem; background: rgba(0, 0, 0, 0.35); padding: .35rem;
+      border-radius: 12px; margin-bottom: 1.5rem;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    .auth-tab-btn {
+      flex: 1; background: transparent; border: none; color: var(--text-muted);
+      padding: .55rem; border-radius: var(--radius-sm); font-weight: 600;
+      font-size: .88rem; cursor: pointer; transition: all .25s ease;
+    }
+    .auth-tab-btn.active {
+      background: rgba(34, 229, 139, 0.16); color: #fff;
+      border: 1px solid rgba(34, 229, 139, 0.45);
+      box-shadow: 0 0 16px rgba(34, 229, 139, 0.22);
+    }
+    .form-group { margin-bottom: 1.15rem; }
+    .form-label { display: block; font-size: .82rem; color: var(--text-muted); margin-bottom: .4rem; font-weight: 500; }
+    .form-input {
+      width: 100%; background: rgba(0, 0, 0, 0.4);
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      color: #fff; padding: .68rem .95rem; border-radius: var(--radius-sm);
+      font-size: .9rem; outline: none; transition: all .2s ease; font-family: inherit;
+    }
+    .form-input:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(34, 229, 139, 0.2), 0 0 16px rgba(34, 229, 139, 0.25);
+      background: rgba(0, 0, 0, 0.55);
+    }
+    .btn {
+      background: linear-gradient(135deg, var(--primary), #10b981);
+      color: #05140b; border: none;
+      padding: .7rem 1.35rem; border-radius: var(--radius-sm); font-weight: 700;
+      font-size: .92rem; cursor: pointer; transition: all .22s cubic-bezier(0.4, 0, 0.2, 1);
+      display: inline-flex; align-items: center; justify-content: center;
+      gap: .55rem; box-shadow: 0 4px 18px rgba(34, 229, 139, 0.4); width: 100%;
+    }
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 26px rgba(34, 229, 139, 0.6);
+      background: linear-gradient(135deg, #2cf095, #17c88b);
+    }
+    .btn-secondary {
+      background: rgba(255, 255, 255, 0.08); color: #fff;
+      border: 1px solid rgba(255, 255, 255, 0.16); box-shadow: none;
+    }
+    .btn-secondary:hover {
+      background: rgba(255, 255, 255, 0.15);
+      border-color: rgba(34, 229, 139, 0.35);
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+      color: #fff;
+    }
+    .btn-danger { background: linear-gradient(135deg, var(--red), #b91c1c); color: #fff; box-shadow: 0 4px 16px rgba(239, 68, 68, 0.35); }
+    .btn-sm { padding: .42rem .95rem; font-size: .82rem; width: auto; border-radius: 8px; }
+    .btn-accent { background: linear-gradient(135deg, var(--accent), #0891b2); color: #04121a; box-shadow: 0 4px 16px rgba(0, 240, 255, 0.35); }
+
+    /* ── Sidebar ──────────────────────────────────────────────────────── */
+    .sidebar {
+      width: var(--sidebar-width);
+      background: rgba(12, 17, 30, 0.65);
+      backdrop-filter: blur(24px) saturate(140%);
+      -webkit-backdrop-filter: blur(24px) saturate(140%);
+      border-right: 1px solid rgba(255, 255, 255, 0.12);
+      display: flex; flex-direction: column; padding: 1.6rem 1.15rem; flex-shrink: 0;
+      position: relative; z-index: 10;
+    }
+    .sidebar-brand {
+      display: flex; align-items: center; gap: .75rem; font-size: 1.3rem;
+      font-weight: 800; letter-spacing: -.5px; margin-bottom: 2rem; padding-left: .5rem;
+    }
+    .sidebar-brand span {
+      background: linear-gradient(135deg, #fff, #cbd5e1);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+    .nav-section-label {
+      font-size: .7rem; font-weight: 700; color: var(--text-muted);
+      text-transform: uppercase; letter-spacing: 1px; margin: 1.25rem 0 .45rem .5rem;
+    }
+    .nav-list { display: flex; flex-direction: column; gap: .35rem; list-style: none; }
+    .nav-item-btn {
+      display: flex; align-items: center; gap: .75rem; padding: .68rem .95rem;
+      border-radius: var(--radius-sm); color: var(--text-muted); font-size: .88rem;
+      font-weight: 600; background: transparent; border: 1px solid transparent; width: 100%;
+      text-align: left; cursor: pointer; transition: all .2s ease;
+    }
+    .nav-item-btn:hover {
+      background: rgba(255, 255, 255, 0.06); color: #fff;
+      border-color: rgba(255, 255, 255, 0.08);
+    }
+    .nav-item-btn.active {
+      background: linear-gradient(135deg, rgba(34, 229, 139, 0.16), rgba(0, 240, 255, 0.08));
+      color: #fff; border: 1px solid rgba(34, 229, 139, 0.4);
+      box-shadow: 0 0 18px rgba(34, 229, 139, 0.18);
+    }
+    .nav-badge {
+      margin-left: auto; background: var(--red); color: #fff; font-size: .65rem;
+      font-weight: 700; padding: .1rem .45rem; border-radius: 20px; min-width: 18px; text-align: center;
+    }
+    .user-profile-card {
+      background: rgba(255, 255, 255, 0.06);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      border-radius: 14px; padding: .85rem;
+      display: flex; align-items: center; justify-content: space-between; margin-top: auto;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+    }
+    .user-info { display: flex; align-items: center; gap: .65rem; overflow: hidden; }
+    .user-avatar {
+      width: 36px; height: 36px; border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent), var(--purple));
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 700; font-size: .92rem; color: #fff; flex-shrink: 0;
+      border: 1px solid rgba(255, 255, 255, 0.25);
+    }
+
+    /* ── Main Layout ──────────────────────────────────────────────────── */
+    .main-viewport { flex: 1; display: flex; flex-direction: column; overflow-y: auto; height: 100vh; position: relative; z-index: 5; }
+    .topbar {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 1.1rem 2.2rem; background: rgba(12, 17, 30, 0.6);
+      backdrop-filter: blur(20px) saturate(140%);
+      -webkit-backdrop-filter: blur(20px) saturate(140%);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1); position: sticky; top: 0; z-index: 50;
+    }
+    .view-container { padding: 1.85rem 2.2rem; flex: 1; max-width: 1440px; width: 100%; margin: 0 auto; }
+
+    /* ── Stats Grid ────────────────────────────────────────────────────── */
+    .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1.35rem; margin-bottom: 1.85rem; }
+    .stat-card {
+      background: rgba(20, 24, 45, 0.85); /* Solid translucent fallback */
+      background: rgba(255, 255, 255, 0.07);
+      backdrop-filter: blur(20px) saturate(140%);
+      -webkit-backdrop-filter: blur(20px) saturate(140%);
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      border-radius: 16px; padding: 1.35rem;
+      display: flex; flex-direction: column; justify-content: space-between;
+      transition: border-color .25s ease, transform .25s ease, box-shadow .25s ease;
+      box-shadow: 0 12px 32px -6px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.14);
+      position: relative; overflow: hidden;
+    }
+    .stat-card::before {
+      content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.35), transparent);
+    }
+    .stat-card:hover {
+      border-color: rgba(34, 229, 139, 0.45); transform: translateY(-3px);
+      box-shadow: 0 18px 40px -6px rgba(0, 0, 0, 0.6), 0 0 24px rgba(34, 229, 139, 0.18), inset 0 1px 0 rgba(255, 255, 255, 0.25);
+    }
+    .stat-icon { font-size: 1.7rem; margin-bottom: .5rem; filter: drop-shadow(0 2px 8px rgba(0,0,0,0.4)); }
+    .stat-title { font-size: .78rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: .5px; }
+    .stat-val { font-size: 1.95rem; font-weight: 800; font-family: 'JetBrains Mono', monospace; color: #fff; margin: .35rem 0; text-shadow: 0 2px 10px rgba(0,0,0,0.5); }
+    .stat-sub { font-size: .78rem; color: var(--primary); display: flex; align-items: center; gap: .3rem; }
+
+    /* ── Cards ─────────────────────────────────────────────────────────── */
+    .card {
+      background: rgba(20, 24, 45, 0.85); /* Solid translucent fallback */
+      background: rgba(255, 255, 255, 0.07);
+      backdrop-filter: blur(20px) saturate(140%);
+      -webkit-backdrop-filter: blur(20px) saturate(140%);
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      border-radius: 20px; padding: 1.6rem;
+      box-shadow: 0 18px 45px -8px rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.16);
+      margin-bottom: 1.6rem;
+    }
+    .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.35rem; flex-wrap: wrap; gap: .75rem; }
+    .card-title { font-size: 1.15rem; font-weight: 700; display: flex; align-items: center; gap: .55rem; letter-spacing: -.2px; }
+
+    /* ── Tables ─────────────────────────────────────────────────────────── */
+    .data-table { width: 100%; border-collapse: collapse; font-size: .88rem; }
+    .data-table th {
+      text-align: left; padding: .85rem 1.1rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+      color: var(--text-muted); font-size: .76rem;
+      text-transform: uppercase; letter-spacing: .6px;
+      background: rgba(255, 255, 255, 0.02);
+    }
+    .data-table td {
+      padding: .9rem 1.1rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      vertical-align: middle;
+      transition: background .15s ease;
+    }
+    .data-table tr:hover td { background: rgba(255, 255, 255, 0.05); }
+    .data-table tr:last-child td { border-bottom: none; }
+
+    /* ── Badges & Pills ─────────────────────────────────────────────────── */
+    .badge {
+      display: inline-flex; align-items: center; gap: .35rem;
+      padding: .25rem .75rem; border-radius: 20px; font-size: .74rem; font-weight: 700;
+      letter-spacing: .4px; backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+    }
+    .badge-live {
+      background: rgba(239, 68, 68, 0.18); border: 1px solid rgba(239, 68, 68, 0.45);
+      color: #fca5a5; box-shadow: 0 0 12px rgba(239, 68, 68, 0.2);
+    }
+    .badge-upcoming { background: rgba(245, 158, 11, 0.16); border: 1px solid rgba(245, 158, 11, 0.35); color: #fcd34d; }
+    .badge-completed { background: rgba(34, 229, 139, 0.14); border: 1px solid rgba(34, 229, 139, 0.35); color: #22E58B; }
+    .badge-excellent { background: rgba(34, 229, 139, 0.18); border: 1px solid rgba(34, 229, 139, 0.45); color: #22E58B; box-shadow: 0 0 12px rgba(34, 229, 139, 0.2); }
+    .badge-good { background: rgba(0, 240, 255, 0.16); border: 1px solid rgba(0, 240, 255, 0.38); color: #67e8f9; }
+    .badge-needs-work { background: rgba(245, 158, 11, 0.16); border: 1px solid rgba(245, 158, 11, 0.35); color: #fcd34d; }
+    .badge-low-conf { background: rgba(239, 68, 68, 0.16); border: 1px solid rgba(239, 68, 68, 0.35); color: #fca5a5; }
+    .pulse-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--red); box-shadow: 0 0 8px var(--red); animation: pulse 1.4s infinite; }
+    @keyframes pulse { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: .4; transform: scale(.85); } }
+    .sample-pill {
+      background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.16);
+      color: var(--text-main); padding: .4rem .9rem; border-radius: 20px; font-size: .82rem;
+      cursor: pointer; transition: all .2s; backdrop-filter: blur(8px);
+    }
+    .sample-pill:hover {
+      background: rgba(34, 229, 139, 0.2); border-color: var(--primary);
+      color: var(--primary); box-shadow: 0 0 14px rgba(34, 229, 139, 0.25);
+    }
+
+    /* ── Live Studio ────────────────────────────────────────────────────── */
+    .stage-wrapper {
+      position: relative; width: 100%; aspect-ratio: 16/9;
+      background: #000; border-radius: var(--radius-md); overflow: hidden;
+      display: flex; align-items: center; justify-content: center;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.6);
+    }
+    #liveCanvas { width: 100%; height: 100%; object-fit: contain; }
+    #webcamVideo { display: none; }
+    .tel-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: .85rem; margin-top: 1rem; }
+    .tel-box {
+      background: rgba(0, 0, 0, 0.35); border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: var(--radius-md); padding: .95rem; backdrop-filter: blur(10px);
+    }
+    .tel-val { font-size: 1.4rem; font-weight: 700; font-family: 'JetBrains Mono', monospace; color: #fff; }
+    .tel-bar-bg { height: 6px; background: rgba(255, 255, 255, 0.08); border-radius: 4px; margin-top: .5rem; overflow: hidden; }
+    .tel-bar-fill {
+      height: 100%; background: linear-gradient(90deg, var(--primary), var(--accent));
+      width: 0%; border-radius: 4px; transition: width .3s ease;
+      box-shadow: 0 0 8px rgba(34, 229, 139, 0.4);
+    }
+    .shot-banner {
+      background: linear-gradient(135deg, rgba(0, 240, 255, 0.16), rgba(34, 229, 139, 0.14));
+      border: 1px solid rgba(34, 229, 139, 0.35); border-radius: var(--radius-md);
+      padding: 1.1rem 1.35rem; display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 1.15rem; box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+    }
+    .delivery-row-new { animation: flash-row .6s ease; }
+    @keyframes flash-row { from { background: rgba(34, 229, 139, 0.28); } to { background: transparent; } }
+
+    /* ── Progress / Bars ─────────────────────────────────────────────────── */
+    .progress-bar-wrap { height: 8px; background: rgba(255, 255, 255, 0.08); border-radius: 4px; overflow: hidden; }
+    .progress-bar-fill { height: 100%; border-radius: 4px; transition: width .4s ease; }
+
+    /* ── Modals ─────────────────────────────────────────────────────────── */
+    .modal-backdrop {
+      position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(4, 7, 14, 0.82);
+      backdrop-filter: blur(24px) saturate(140%);
+      -webkit-backdrop-filter: blur(24px) saturate(140%);
+      display: none; align-items: center; justify-content: center;
+      z-index: 10000; padding: 1.5rem;
+    }
+    .modal-backdrop.active { display: flex; }
+    .modal-box {
+      background: rgba(20, 24, 45, 0.85); /* Solid translucent fallback */
+      background: rgba(255, 255, 255, 0.09);
+      backdrop-filter: blur(24px) saturate(140%);
+      -webkit-backdrop-filter: blur(24px) saturate(140%);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 20px; width: 100%; max-width: 860px;
+      max-height: 90vh; overflow-y: auto; padding: 2rem;
+      box-shadow: 0 30px 70px rgba(0, 0, 0, 0.8), inset 0 1px 0 rgba(255, 255, 255, 0.22);
+      position: relative;
+    }
+    .modal-close {
+      position: absolute; top: 1.25rem; right: 1.25rem;
+      background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.15);
+      color: #fff; width: 34px; height: 34px; border-radius: 50%;
+      cursor: pointer; font-size: 1.15rem; display: flex; align-items: center; justify-content: center;
+      transition: all .2s;
+    }
+    .modal-close:hover { background: rgba(255, 255, 255, 0.2); transform: scale(1.08); }
+
+    /* ── Charts ──────────────────────────────────────────────────────────── */
+    .zone-field { width: 100%; max-width: 340px; margin: 0 auto; }
+
+    /* ── Misc utilities ─────────────────────────────────────────────────── */
+    .text-muted { color: var(--text-muted); }
+    .text-primary { color: var(--primary); }
+    .text-accent { color: var(--accent); }
+    .text-gold { color: var(--gold); }
+    .text-red { color: var(--red); }
+    .font-mono { font-family: 'JetBrains Mono', monospace; }
+    .flex { display: flex; }
+    .flex-center { display: flex; align-items: center; justify-content: center; }
+    .gap-1 { gap: .5rem; } .gap-2 { gap: 1rem; }
+    .mt-1 { margin-top: .5rem; } .mt-2 { margin-top: 1rem; } .mb-1 { margin-bottom: .5rem; }
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+    .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.25rem; }
+    hr.divider { border: none; border-top: 1px solid rgba(255, 255, 255, 0.1); margin: 1.35rem 0; }
+    .empty-state { text-align: center; padding: 2.85rem 1rem; color: var(--text-muted); }
+    .empty-state .icon { font-size: 3.2rem; margin-bottom: .75rem; filter: drop-shadow(0 2px 8px rgba(0,0,0,0.4)); }
+    .spinner { display: inline-block; width: 20px; height: 20px; border: 2px solid rgba(255,255,255,.2); border-top-color: var(--primary); border-radius: 50%; animation: spin .7s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    input[type=range] { accent-color: var(--primary); }
+    select.form-input option { background: #0f1629; color: #fff; }
+  </style>
+</head>
+<body>
+
+<!-- Ambient Glowing Orbs Background System -->
+<div class="ambient-orbs-container" aria-hidden="true">
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+  <div class="orb orb-3"></div>
+</div>
+
+<!-- ── AUTH OVERLAY ────────────────────────────────────────────────────────── -->
+<div id="authOverlay">
+  <!-- Glowing orb behind auth card -->
+  <div class="auth-orb" aria-hidden="true"></div>
+  <div class="auth-box glass">
+    <div class="auth-brand">
+      <div class="auth-brand-icon">🏏</div>
+      <h2>CricPose AI</h2>
+      <p style="color:var(--text-muted);font-size:.85rem;margin-top:.25rem;">Cricket Live Shot Analysis Platform</p>
+    </div>
+    <div class="auth-tabs">
+      <button class="auth-tab-btn active" id="tabSignIn" onclick="toggleAuthTab('login')">Sign In</button>
+      <button class="auth-tab-btn" id="tabSignUp" onclick="toggleAuthTab('register')">Create Account</button>
+    </div>
+    <div id="authErrorMsg" style="display:none;background:rgba(239,68,68,.15);border:1px solid rgba(239,68,68,.4);color:#fca5a5;padding:.6rem;border-radius:var(--radius-sm);font-size:.82rem;margin-bottom:1rem;"></div>
+    <form id="formLogin" onsubmit="handleLogin(event)">
+      <div class="form-group"><label class="form-label">Username or Email</label><input type="text" id="loginUsername" class="form-input" placeholder="e.g. demo" required value="demo"></div>
+      <div class="form-group"><label class="form-label">Password</label><input type="password" id="loginPassword" class="form-input" placeholder="••••••••" required value="demo123"></div>
+      <button type="submit" class="btn" style="margin-top:.5rem;"><span>🔓</span> Sign In to Dashboard</button>
+    </form>
+    <form id="formRegister" onsubmit="handleRegister(event)" style="display:none;">
+      <div class="form-group"><label class="form-label">Full Name</label><input type="text" id="regFullName" class="form-input" placeholder="Virat Kohli" required></div>
+      <div class="form-group"><label class="form-label">Username</label><input type="text" id="regUsername" class="form-input" placeholder="vkohli18" required></div>
+      <div class="form-group"><label class="form-label">Email</label><input type="email" id="regEmail" class="form-input" placeholder="vkohli@india.cricket" required></div>
+      <div class="form-group"><label class="form-label">Password</label><input type="password" id="regPassword" class="form-input" placeholder="••••••••" required></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:.75rem;">
+        <div class="form-group"><label class="form-label">Batting Hand</label><select id="regHandedness" class="form-input"><option value="Right-Handed">Right-Handed</option><option value="Left-Handed">Left-Handed</option></select></div>
+        <div class="form-group"><label class="form-label">Batting Order</label><select id="regStyle" class="form-input"><option value="Top Order">Top Order</option><option value="Middle Order">Middle Order</option><option value="Finisher">Finisher</option></select></div>
+      </div>
+      <button type="submit" class="btn" style="margin-top:.5rem;"><span>✨</span> Create Account</button>
+    </form>
+    <div style="margin-top:1.25rem;text-align:center;border-top:1px solid rgba(255,255,255,0.12);padding-top:1rem;">
+      <button type="button" class="btn btn-secondary" onclick="loginDemoUser()"><span>⚡</span> Instant Demo Guest Access</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── MAIN APP ─────────────────────────────────────────────────────────────── -->
+<div id="appRoot">
+
+  <!-- Sidebar -->
+  <aside class="sidebar glass">
+    <div class="sidebar-brand">
+      <div style="width:34px;height:34px;background:linear-gradient(135deg,var(--primary),var(--accent));border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.15rem;flex-shrink:0;box-shadow:0 0 16px var(--primary-glow);border:1px solid rgba(255,255,255,0.25);">🏏</div>
+      <span>CricPose AI</span>
+    </div>
+    <div class="nav-section-label">Analysis</div>
+    <ul class="nav-list">
+      <li><button class="nav-item-btn active" id="navOverview" onclick="navigateTo('overview')"><span>📊</span> Overview Dashboard</button></li>
+      <li><button class="nav-item-btn" id="navMatches" onclick="navigateTo('matches')"><span>🏟️</span> Match Management</button></li>
+      <li><button class="nav-item-btn" id="navAnalytics" onclick="navigateTo('analytics')"><span>📈</span> Player Analytics</button></li>
+    </ul>
+    <div class="nav-section-label">Input Modes</div>
+    <ul class="nav-list">
+      <li><button class="nav-item-btn" id="navLive" onclick="navigateTo('live')"><span style="color:var(--red);">🔴</span> Live Camera Studio</button></li>
+      <li><button class="nav-item-btn" id="navUpload" onclick="navigateTo('upload')"><span>📁</span> Video File Replay</button></li>
+    </ul>
+    <div class="nav-section-label">Reference</div>
+    <ul class="nav-list">
+      <li><button class="nav-item-btn" id="navTelemetry" onclick="navigateTo('telemetry')"><span>📐</span> Biomechanical Guide</button></li>
+      <li><button class="nav-item-btn" id="navDrills" onclick="navigateTo('drills')"><span>🏆</span> AI Coaching Drills</button></li>
+      <li><button class="nav-item-btn" id="navAdmin" onclick="navigateTo('admin')"><span>🔧</span> Admin / Monitoring <span class="nav-badge" id="adminBadge" style="display:none">0</span></button></li>
+    </ul>
+    <div class="user-profile-card">
+      <div class="user-info">
+        <div class="user-avatar" id="userAvatarChar">R</div>
+        <div style="overflow:hidden;">
+          <div id="userNameDisplay" style="font-weight:700;font-size:.85rem;white-space:nowrap;text-overflow:ellipsis;overflow:hidden;">Rohit Sharma</div>
+          <div id="userStyleDisplay" style="font-size:.72rem;color:var(--primary);">Right-Handed Pro</div>
+        </div>
+      </div>
+      <button onclick="handleLogout()" title="Logout" style="background:none;border:none;color:var(--text-muted);cursor:pointer;font-size:1.1rem;">🚪</button>
+    </div>
+  </aside>
+
+  <!-- Main Viewport -->
+  <div class="main-viewport">
+    <header class="topbar glass">
+      <div>
+        <h1 id="viewHeaderTitle" style="font-size:1.25rem;font-weight:800;">Overview Dashboard</h1>
+        <p id="viewHeaderSub" style="font-size:.8rem;color:var(--text-muted);">Real-time cricket shot performance & technique metrics</p>
+      </div>
+      <div style="display:flex;align-items:center;gap:1rem;">
+        <div class="badge badge-live" id="topOnAirBadge" style="display:none;"><span class="pulse-dot"></span><span>ON-AIR LIVE</span></div>
+        <button class="btn btn-sm" onclick="navigateTo('live');startBroadcast();"><span>🔴</span> Launch Live Camera</button>
+      </div>
+    </header>
+
+    <div class="view-container">
+
+      <!-- ═══════════════════════════════════════════════════════════════════ -->
+      <!-- VIEW: OVERVIEW DASHBOARD                                            -->
+      <!-- ═══════════════════════════════════════════════════════════════════ -->
+      <div id="viewOverview">
+        <div class="stats-grid">
+          <div class="stat-card glass"><div class="stat-icon">🎯</div><span class="stat-title">Total Shots Analyzed</span><div class="stat-val" id="statTotalShots">—</div><div class="stat-sub"><span>⚡</span> Full Pose Tracking Active</div></div>
+          <div class="stat-card glass"><div class="stat-icon">🏆</div><span class="stat-title">Overall Technique Grade</span><div class="stat-val" id="statAvgScore" style="color:var(--primary);">—</div><div class="stat-sub" style="color:var(--primary);"><span>🏆</span> <span id="statFormLabel">Elite Standard</span></div></div>
+          <div class="stat-card glass"><div class="stat-icon">🏏</div><span class="stat-title">Dominant Stroke</span><div class="stat-val" id="statFavShot" style="font-size:1.35rem;">—</div><div class="stat-sub" style="color:var(--accent);"><span>🏏</span> Most frequent shot</div></div>
+          <div class="stat-card glass"><div class="stat-icon">📋</div><span class="stat-title">Total Matches</span><div class="stat-val" id="statTotalMatches">—</div><div class="stat-sub" style="color:var(--gold);"><span>🏟️</span> Live + Offline sessions</div></div>
+        </div>
+        <div class="card glass">
+          <div class="card-header"><h3 class="card-title"><span>🎯</span> Stroke Classification Distribution</h3></div>
+          <div id="shotDistBars" style="display:flex;flex-direction:column;gap:.75rem;"></div>
+        </div>
+        <div class="card glass">
+          <div class="card-header">
+            <h3 class="card-title"><span>📋</span> Recent Analysis History</h3>
+            <button class="btn btn-sm btn-secondary" onclick="navigateTo('analytics')">View Full Analytics →</button>
+          </div>
+          <table class="data-table">
+            <thead><tr><th>Stroke Type</th><th>Quality Score</th><th>Source</th><th>Coaching Feedback</th><th>Date</th></tr></thead>
+            <tbody id="recentSessionsTbody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ═══════════════════════════════════════════════════════════════════ -->
+      <!-- VIEW: MATCH MANAGEMENT                                              -->
+      <!-- ═══════════════════════════════════════════════════════════════════ -->
+      <div id="viewMatches" style="display:none;">
+        <div class="card">
+          <div class="card-header">
+            <h3 class="card-title"><span>🏟️</span> Match Records</h3>
+            <div style="display:flex;gap:.75rem;align-items:center;">
+              <select id="matchStatusFilter" class="form-input" style="width:auto;padding:.4rem .8rem;font-size:.82rem;" onchange="loadMatches()">
+                <option value="">All Matches</option>
+                <option value="upcoming">Upcoming</option>
+                <option value="live">Live</option>
+                <option value="completed">Completed</option>
+              </select>
+              <button class="btn btn-sm" onclick="openCreateMatchModal()"><span>➕</span> New Match</button>
+            </div>
+          </div>
+          <div id="matchListContainer"></div>
+        </div>
+      </div>
+
+      <!-- ═══════════════════════════════════════════════════════════════════ -->
+      <!-- VIEW: PLAYER ANALYTICS                                              -->
+      <!-- ═══════════════════════════════════════════════════════════════════ -->
+      <div id="viewAnalytics" style="display:none;">
+        <!-- Filter Bar -->
+        <div class="card" style="margin-bottom:1rem;">
+          <div style="display:flex;gap:1rem;align-items:flex-end;flex-wrap:wrap;">
+            <div><label class="form-label">Shot Type</label>
+              <select id="filterShotType" class="form-input" style="width:auto;">
+                <option value="">All Shots</option>
+              </select>
+            </div>
+            <div><label class="form-label">Period</label>
+              <select id="filterPeriod" class="form-input" style="width:auto;">
+                <option value="30">Last 30 days</option>
+                <option value="7">Last 7 days</option>
+                <option value="90">Last 90 days</option>
+                <option value="365">Last year</option>
+              </select>
+            </div>
+            <button class="btn btn-sm" onclick="loadAnalytics()"><span>🔍</span> Apply Filters</button>
+            <button class="btn btn-sm btn-secondary" onclick="exportPlayerCSV()"><span>📥</span> Export CSV</button>
+          </div>
+        </div>
+        <!-- Profile Stats -->
+        <div class="stats-grid" id="analyticsStatsGrid"></div>
+        <!-- Charts row -->
+        <div class="grid-2">
+          <div class="card">
+            <div class="card-header"><h3 class="card-title"><span>📊</span> Shot Distribution</h3></div>
+            <div id="analyticsShotDist" style="display:flex;flex-direction:column;gap:.6rem;"></div>
+          </div>
+          <div class="card">
+            <div class="card-header"><h3 class="card-title"><span>📍</span> Field Zone Placement</h3></div>
+            <div id="analyticsZoneDist" style="display:flex;flex-direction:column;gap:.6rem;"></div>
+          </div>
+        </div>
+        <!-- Quality Trend -->
+        <div class="card">
+          <div class="card-header"><h3 class="card-title"><span>📈</span> Quality Score Trend</h3></div>
+          <canvas id="trendCanvas" height="140" style="width:100%;"></canvas>
+          <div id="trendEmpty" class="empty-state" style="display:none;"><div class="icon">📈</div><p>No trend data yet. Analyze more shots to see your progress.</p></div>
+        </div>
+        <!-- Recent shots table -->
+        <div class="card">
+          <div class="card-header"><h3 class="card-title"><span>📋</span> Shot Log</h3></div>
+          <table class="data-table">
+            <thead><tr><th>Shot Type</th><th>Quality</th><th>Confidence</th><th>Zone</th><th>Source</th><th>Corrected</th><th>Date</th></tr></thead>
+            <tbody id="analyticsShotsTbody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ═══════════════════════════════════════════════════════════════════ -->
+      <!-- VIEW: LIVE BROADCAST STUDIO                                         -->
+      <!-- ═══════════════════════════════════════════════════════════════════ -->
+      <div id="viewLive" style="display:none;">
+        <div class="card">
+          <div class="card-header">
+            <div style="display:flex;align-items:center;gap:.75rem;flex-wrap:wrap;">
+              <select id="cameraSelect" class="form-input" style="width:auto;padding:.45rem .8rem;font-size:.85rem;"><option value="">Detecting Cameras...</option></select>
+              <select id="livematchSelect" class="form-input" style="width:auto;padding:.45rem .8rem;font-size:.85rem;"><option value="">— No Match Selected —</option></select>
+              <button id="btnToggleBroadcast" class="btn btn-sm" onclick="toggleBroadcast()"><span>🔴</span> Start Live Broadcast</button>
+              <button id="btnSnapshot" class="btn btn-sm btn-secondary" onclick="captureSnapshot()" disabled><span>📸</span> Snap &amp; Breakdown</button>
+            </div>
+            <div style="display:flex;gap:1rem;font-size:.82rem;color:var(--text-muted);">
+              <label style="cursor:pointer;"><input type="checkbox" id="chkMirror" checked> Mirror View</label>
+              <label style="cursor:pointer;"><input type="checkbox" id="chkHUD" checked> TV Broadcast HUD</label>
+            </div>
+          </div>
+          <div class="grid-2">
+            <div>
+              <div class="stage-wrapper">
+                <video id="webcamVideo" autoplay playsinline muted></video>
+                <canvas id="liveCanvas"></canvas>
+                <div id="stagePlaceholder" style="text-align:center;color:var(--text-muted);padding:2rem;">
+                  <span style="font-size:3rem;">📹</span>
+                  <h4 style="color:#fff;margin:.5rem 0;">Camera Inactive</h4>
+                  <p style="font-size:.85rem;">Click "Start Live Broadcast" to begin real-time tracking.</p>
+                </div>
+              </div>
+              <!-- Latency & wrist speed readout -->
+              <div style="margin-top:.75rem;display:flex;gap:1rem;font-size:.8rem;color:var(--text-muted);">
+                <span>Delivery #<strong id="liveDeliveryNo" style="color:#fff;">0</strong></span>
+                <span>Wrist Speed: <strong id="liveWristSpeed" style="color:var(--accent);">—</strong></span>
+                <span>FPS: <strong id="liveFPS" style="color:var(--primary);">—</strong></span>
+              </div>
+            </div>
+            <div>
+              <div class="shot-banner">
+                <div><div style="font-size:.72rem;color:var(--text-muted);text-transform:uppercase;">Classified Stroke</div><div id="liveShotName" style="font-size:1.3rem;font-weight:800;color:#fff;">🏏 Cover Drive</div></div>
+                <div style="text-align:right;"><div style="font-size:.72rem;color:var(--text-muted);text-transform:uppercase;">Confidence</div><div id="liveShotConf" style="font-size:1.2rem;font-weight:700;color:var(--accent);">—</div></div>
+              </div>
+              <div class="tel-grid">
+                <div class="tel-box"><div style="font-size:.78rem;color:var(--text-muted);">Elbow Extension</div><div class="tel-val" id="valElbow">--°</div><div class="tel-bar-bg"><div class="tel-bar-fill" id="barElbow"></div></div></div>
+                <div class="tel-box"><div style="font-size:.78rem;color:var(--text-muted);">Spine Lean</div><div class="tel-val" id="valSpine">--°</div><div class="tel-bar-bg"><div class="tel-bar-fill" id="barSpine"></div></div></div>
+                <div class="tel-box"><div style="font-size:.78rem;color:var(--text-muted);">Head/Knee Balance</div><div class="tel-val" id="valHead">--</div><div class="tel-bar-bg"><div class="tel-bar-fill" id="barHead"></div></div></div>
+                <div class="tel-box"><div style="font-size:.78rem;color:var(--text-muted);">Foot Stride Alignment</div><div class="tel-val" id="valFoot">--°</div><div class="tel-bar-bg"><div class="tel-bar-fill" id="barFoot"></div></div></div>
+              </div>
+              <div style="margin-top:1rem;background:rgba(0,0,0,.35);border-left:4px solid var(--gold);padding:.85rem;border-radius:0 var(--radius-sm) var(--radius-sm) 0;">
+                <div style="font-size:.75rem;color:var(--gold);font-weight:700;text-transform:uppercase;">🎙️ AI Live Commentary</div>
+                <p id="liveCoachText" style="font-size:.85rem;color:#fff;margin-top:.25rem;">Take your batting stance in the camera frame.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- Live Delivery Log -->
+        <div class="card">
+          <div class="card-header"><h3 class="card-title"><span>📋</span> Live Delivery Log</h3><span class="badge badge-live" id="liveLogBadge" style="display:none;"><span class="pulse-dot"></span> Recording</span></div>
+          <table class="data-table">
+            <thead><tr><th>#</th><th>Shot Type</th><th>Quality</th><th>Confidence</th><th>Zone</th><th>Latency</th><th>Actions</th></tr></thead>
+            <tbody id="liveDeliveryLog"></tbody>
+          </table>
+          <div id="liveLogEmpty" class="empty-state"><div class="icon">🏏</div><p>Deliveries will appear here when contact is detected during live broadcast.</p></div>
+        </div>
+      </div>
+
+      <!-- ═══════════════════════════════════════════════════════════════════ -->
+      <!-- VIEW: VIDEO FILE REPLAY                                             -->
+      <!-- ═══════════════════════════════════════════════════════════════════ -->
+      <div id="viewUpload" style="display:none;">
+        <div class="card">
+          <div class="card-header"><h3 class="card-title"><span>📼</span> Match Footage &amp; Video Analysis</h3></div>
+          <div class="grid-2">
+            <div>
+              <div class="stage-wrapper">
+                <video id="fileVideoPlayer" controls style="width:100%;height:100%;display:none;"></video>
+                <div id="filePlaceholder" style="text-align:center;color:var(--text-muted);padding:2rem;">
+                  <span style="font-size:3rem;">📹</span><h4 style="color:#fff;margin:.5rem 0;">No Video Loaded</h4>
+                  <p style="font-size:.85rem;">Upload a clip or choose a masterclass sample below.</p>
+                </div>
+              </div>
+              <!-- Upload controls -->
+              <div style="margin-top:1rem;">
+                <div style="display:flex;gap:.75rem;align-items:center;flex-wrap:wrap;margin-bottom:.75rem;">
+                  <select id="uploadMatchSelect" class="form-input" style="width:auto;padding:.45rem .8rem;font-size:.85rem;"><option value="">— Link to Match (optional) —</option></select>
+                  <button class="btn btn-sm" onclick="document.getElementById('fileUploadInput').click();"><span>📤</span> Upload Video</button>
+                  <input type="file" id="fileUploadInput" accept="video/*" style="display:none;">
+                  <div id="uploadSpinner" style="display:none;"><div class="spinner"></div></div>
+                </div>
+                <div style="display:flex;flex-wrap:wrap;gap:.5rem;align-items:center;">
+                  <span style="font-size:.8rem;color:var(--text-muted);">Pro Masterclasses:</span>
+                  <button type="button" class="sample-pill" onclick="loadSampleVideo('1.1')">⚡ Virat Kohli 1.1</button>
+                  <button type="button" class="sample-pill" onclick="loadSampleVideo('PrithviShaw')">🏏 Prithvi Shaw</button>
+                  <button type="button" class="sample-pill" onclick="loadSampleVideo('virat kohli')">🔥 Kohli Masterclass</button>
+                </div>
+              </div>
+            </div>
+            <!-- Result Panel -->
+            <div>
+              <div class="shot-banner" id="fileScoreBanner" style="display:none;">
+                <div><div style="font-size:.72rem;color:var(--text-muted);text-transform:uppercase;">Classified Shot</div><div id="fileShotTypeTag" style="font-size:1.2rem;font-weight:800;color:#fff;">Cover Drive</div></div>
+                <div style="text-align:right;"><div style="font-size:.72rem;color:var(--text-muted);text-transform:uppercase;">Quality Score</div><div id="fileQualityScore" style="font-size:1.2rem;font-weight:700;color:var(--primary);">—</div></div>
+              </div>
+              <div id="fileFeedbackList" style="display:flex;flex-direction:column;gap:.6rem;">
+                <div style="background:rgba(0,0,0,.25);border-left:4px solid var(--primary);padding:.85rem;border-radius:0 var(--radius-sm) var(--radius-sm) 0;"><div style="font-weight:700;font-size:.85rem;">Footwork &amp; Weight Transfer</div><p style="font-size:.8rem;color:var(--text-muted);margin-top:.2rem;">Optimal forward stride planting close to pitch of delivery.</p></div>
+                <div style="background:rgba(0,0,0,.25);border-left:4px solid var(--accent);padding:.85rem;border-radius:0 var(--radius-sm) var(--radius-sm) 0;"><div style="font-weight:700;font-size:.85rem;">High Elbow Presentation</div><p style="font-size:.8rem;color:var(--text-muted);margin-top:.2rem;">Dominant top hand guiding stroke with high elbow elevation.</p></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- Shot Report Table (populated after upload) -->
+        <div class="card" id="uploadShotReportCard" style="display:none;">
+          <div class="card-header">
+            <h3 class="card-title"><span>🎯</span> Shot Report</h3>
+            <div style="display:flex;gap:.75rem;">
+              <span id="uploadMatchShotId" style="font-size:.78rem;color:var(--text-muted);display:none;"></span>
+              <button class="btn btn-sm btn-secondary" onclick="exportCurrentMatchCSV()" id="btnExportUpload"><span>📥</span> Export CSV</button>
+            </div>
+          </div>
+          <table class="data-table">
+            <thead><tr><th>Shot Type</th><th>Confidence</th><th>Quality</th><th>Zone</th><th>Actions</th></tr></thead>
+            <tbody id="uploadShotReportTbody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ═══════════════════════════════════════════════════════════════════ -->
+      <!-- VIEW: BIOMECHANICAL GUIDE                                           -->
+      <!-- ═══════════════════════════════════════════════════════════════════ -->
+      <div id="viewTelemetry" style="display:none;">
+        <div class="card">
+          <h3 class="card-title" style="margin-bottom:1rem;"><span>📐</span> Biomechanical Metric Formulations</h3>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:1rem;">
+            <div style="background:rgba(0,0,0,.3);border:1px solid var(--border-color);border-radius:var(--radius-md);padding:1.1rem;"><h4 style="color:var(--primary);font-size:.95rem;margin-bottom:.4rem;">1. Lead Elbow Angle</h4><p style="font-size:.82rem;color:var(--text-muted);line-height:1.5;">Ideal: <strong>100°–155°</strong>. Evaluates top-hand dominance and elbow elevation through swing contact line. Lower = dropped elbow, poor control.</p></div>
+            <div style="background:rgba(0,0,0,.3);border:1px solid var(--border-color);border-radius:var(--radius-md);padding:1.1rem;"><h4 style="color:var(--accent);font-size:.95rem;margin-bottom:.4rem;">2. Spine Posture Lean</h4><p style="font-size:.82rem;color:var(--text-muted);line-height:1.5;">Ideal: <strong>85°–95°</strong>. Angle of the spine relative to the vertical plumb gravity line. Greater deviation = falling away or into the shot.</p></div>
+            <div style="background:rgba(0,0,0,.3);border:1px solid var(--border-color);border-radius:var(--radius-md);padding:1.1rem;"><h4 style="color:var(--gold);font-size:.95rem;margin-bottom:.4rem;">3. Head-Over-Knee Offset</h4><p style="font-size:.82rem;color:var(--text-muted);line-height:1.5;">Ideal: <strong>&lt; 0.10</strong>. Normalised lateral distance of nose from front knee. Higher = head falling away from line of ball.</p></div>
+            <div style="background:rgba(0,0,0,.3);border:1px solid var(--border-color);border-radius:var(--radius-md);padding:1.1rem;"><h4 style="color:var(--purple);font-size:.95rem;margin-bottom:.4rem;">4. Foot Stride Vector</h4><p style="font-size:.82rem;color:var(--text-muted);line-height:1.5;">Straight Drive: <strong>0°–15°</strong> | Cover Drive: <strong>35°–55°</strong>. Discriminates shot direction from stride angle at contact moment.</p></div>
+            <div style="background:rgba(0,0,0,.3);border:1px solid var(--border-color);border-radius:var(--radius-md);padding:1.1rem;"><h4 style="color:var(--orange);font-size:.95rem;margin-bottom:.4rem;">5. Wrist Velocity (Contact)</h4><p style="font-size:.82rem;color:var(--text-muted);line-height:1.5;">Used by the <strong>ContactDetector</strong> to fire per-delivery events. Spike above 0.018 normalised units triggers shot classification.</p></div>
+            <div style="background:rgba(0,0,0,.3);border:1px solid var(--border-color);border-radius:var(--radius-md);padding:1.1rem;"><h4 style="color:#a78bfa;font-size:.95rem;margin-bottom:.4rem;">6. Hip-Shoulder Rotation</h4><p style="font-size:.82rem;color:var(--text-muted);line-height:1.5;">Lateral twist between hip plane and shoulder plane. Used in the 10-feature shot classification model to distinguish pull from drive shots.</p></div>
+          </div>
+        </div>
+        <div class="card">
+          <h3 class="card-title" style="margin-bottom:1rem;"><span>🏏</span> Shot Taxonomy (v1)</h3>
+          <div id="taxonomyGrid" style="display:flex;flex-wrap:wrap;gap:.6rem;"></div>
+        </div>
+      </div>
+
+      <!-- ═══════════════════════════════════════════════════════════════════ -->
+      <!-- VIEW: AI COACHING DRILLS                                            -->
+      <!-- ═══════════════════════════════════════════════════════════════════ -->
+      <div id="viewDrills" style="display:none;">
+        <div class="card">
+          <h3 class="card-title" style="margin-bottom:1.25rem;"><span>🏆</span> Personalized AI Coaching Drills</h3>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:1.25rem;">
+            <div style="background:rgba(0,0,0,.3);border:1px solid var(--border-color);border-radius:var(--radius-md);padding:1.25rem;">
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.5rem;"><span style="font-weight:700;color:#fff;">Drill 1: High Elbow Hanging Ball</span><span class="badge badge-excellent">Recommended</span></div>
+              <p style="font-size:.82rem;color:var(--text-muted);margin-bottom:.75rem;">Fix dropped lead elbow and keep ball along the ground with suspended ball drills.</p>
+              <div style="font-size:.78rem;color:#a7f3d0;">Target Metric: Maintain Elbow Angle between 120°–145°</div>
+            </div>
+            <div style="background:rgba(0,0,0,.3);border:1px solid var(--border-color);border-radius:var(--radius-md);padding:1.25rem;">
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.5rem;"><span style="font-weight:700;color:#fff;">Drill 2: Head-Over-Ball Drop Routine</span><span class="badge badge-good">Balance</span></div>
+              <p style="font-size:.82rem;color:var(--text-muted);margin-bottom:.75rem;">Drop stationary balls from eye height to reinforce head alignment over front knee.</p>
+              <div style="font-size:.78rem;color:#67e8f9;">Target Metric: Head-over-Knee offset &lt; 0.05</div>
+            </div>
+            <div style="background:rgba(0,0,0,.3);border:1px solid var(--border-color);border-radius:var(--radius-md);padding:1.25rem;">
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.5rem;"><span style="font-weight:700;color:#fff;">Drill 3: Spine Alignment Wall Touch</span><span class="badge" style="background:rgba(139,92,246,.2);border:1px solid rgba(139,92,246,.3);color:#c4b5fd;">Posture</span></div>
+              <p style="font-size:.82rem;color:var(--text-muted);margin-bottom:.75rem;">Practice strokes with back against a wall guide to train upright spine lean and prevent falling away.</p>
+              <div style="font-size:.78rem;color:#c4b5fd;">Target Metric: Spine Lean within 85°–95°</div>
+            </div>
+            <div style="background:rgba(0,0,0,.3);border:1px solid var(--border-color);border-radius:var(--radius-md);padding:1.25rem;">
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.5rem;"><span style="font-weight:700;color:#fff;">Drill 4: Cover Drive Corridor Cone</span><span class="badge badge-upcoming">Footwork</span></div>
+              <p style="font-size:.82rem;color:var(--text-muted);margin-bottom:.75rem;">Place a cone at extra cover. Drive through the cone corridor to train correct stride angle and timing.</p>
+              <div style="font-size:.78rem;color:#fcd34d;">Target Metric: Foot Stride Angle 35°–55° (Cover Drive)</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ═══════════════════════════════════════════════════════════════════ -->
+      <!-- VIEW: ADMIN / MONITORING                                            -->
+      <!-- ═══════════════════════════════════════════════════════════════════ -->
+      <div id="viewAdmin" style="display:none;">
+        <div class="stats-grid" id="adminStatsGrid"></div>
+        <div class="card">
+          <div class="card-header"><h3 class="card-title"><span>🔧</span> Low-Confidence Review Queue</h3>
+            <div style="display:flex;gap:.75rem;">
+              <select id="reviewQueueFilter" class="form-input" style="width:auto;padding:.4rem .8rem;font-size:.82rem;" onchange="loadAdminData()"><option value="pending">Pending</option><option value="reviewed">Reviewed</option><option value="dismissed">Dismissed</option></select>
+            </div>
+          </div>
+          <table class="data-table">
+            <thead><tr><th>Shot ID</th><th>Shot Type</th><th>Confidence</th><th>Match</th><th>Queued</th><th>Actions</th></tr></thead>
+            <tbody id="reviewQueueTbody"></tbody>
+          </table>
+          <div id="reviewQueueEmpty" class="empty-state" style="display:none;"><div class="icon">✅</div><p>No shots in the review queue — model confidence is healthy!</p></div>
+        </div>
+        <div class="card">
+          <div class="card-header"><h3 class="card-title"><span>⏱️</span> Latency Statistics</h3></div>
+          <table class="data-table" id="latencyTable">
+            <thead><tr><th>Match ID</th><th>Samples</th><th>Avg (ms)</th><th>p50 (ms)</th><th>p95 (ms)</th><th>Max (ms)</th><th>Target Met (&lt;3s)</th></tr></thead>
+            <tbody id="latencyTbody"></tbody>
+          </table>
+          <div id="latencyEmpty" class="empty-state" style="display:none;"><div class="icon">⏱️</div><p>No latency data yet. Run a live session to see measurements.</p></div>
+        </div>
+      </div>
+
+    </div><!-- /view-container -->
+  </div><!-- /main-viewport -->
+</div><!-- /appRoot -->
+
+<!-- ── MODALS ─────────────────────────────────────────────────────────────── -->
+
+<!-- Snapshot Modal -->
+<div class="modal-backdrop" id="snapshotModal">
+  <div class="modal-box">
+    <button class="modal-close" onclick="closeModal('snapshotModal')">×</button>
+    <h2 style="font-size:1.4rem;font-weight:800;margin-bottom:.5rem;">📸 Instant Stroke Biomechanical Breakdown</h2>
+    <p style="font-size:.85rem;color:var(--text-muted);margin-bottom:1.25rem;">Freeze-frame capture analyzed with 10-feature skeletal pose estimation.</p>
+    <div class="grid-2">
+      <div><img id="modalSnapImg" src="" alt="Stroke Snapshot" style="width:100%;border-radius:var(--radius-md);border:1px solid var(--border-color);"></div>
+      <div>
+        <div class="shot-banner" style="margin-bottom:1rem;">
+          <div><div style="font-size:.72rem;color:var(--text-muted);text-transform:uppercase;">Classified Stroke</div><div id="modalShotName" style="font-size:1.2rem;color:#fff;font-weight:700;">Cover Drive</div></div>
+          <div style="text-align:right;"><div style="font-size:.72rem;color:var(--text-muted);text-transform:uppercase;">Form Rating</div><div id="modalQualityScore" style="font-size:1.2rem;color:var(--primary);font-weight:700;">—</div></div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:.6rem;" id="modalMetricsList"></div>
+        <div style="margin-top:1rem;background:rgba(0,0,0,.3);border-left:4px solid var(--gold);padding:.75rem;border-radius:0 var(--radius-sm) var(--radius-sm) 0;">
+          <div style="font-size:.75rem;color:var(--gold);font-weight:700;">Coaching Takeaway</div>
+          <p id="modalCoachText" style="font-size:.82rem;color:#fff;margin-top:.2rem;">Great front foot extension and high elbow.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Create Match Modal -->
+<div class="modal-backdrop" id="createMatchModal">
+  <div class="modal-box" style="max-width:540px;">
+    <button class="modal-close" onclick="closeModal('createMatchModal')">×</button>
+    <h2 style="font-size:1.3rem;font-weight:800;margin-bottom:1.25rem;">🏟️ Create New Match</h2>
+    <form id="formCreateMatch" onsubmit="handleCreateMatch(event)">
+      <div class="form-group"><label class="form-label">Match Title *</label><input type="text" id="matchTitle" class="form-input" placeholder="India vs Australia — Practice Session" required></div>
+      <div class="grid-2">
+        <div class="form-group"><label class="form-label">Team A</label><input type="text" id="matchTeamA" class="form-input" placeholder="India"></div>
+        <div class="form-group"><label class="form-label">Team B</label><input type="text" id="matchTeamB" class="form-input" placeholder="Australia"></div>
+      </div>
+      <div class="grid-2">
+        <div class="form-group"><label class="form-label">Format</label><select id="matchFormat" class="form-input"><option value="T20">T20</option><option value="ODI">ODI</option><option value="Test">Test</option><option value="T10">T10</option><option value="Practice">Practice</option></select></div>
+        <div class="form-group"><label class="form-label">Venue</label><input type="text" id="matchVenue" class="form-input" placeholder="Wankhede Stadium, Mumbai"></div>
+      </div>
+      <div style="display:flex;gap:.75rem;margin-top:1rem;">
+        <button type="submit" class="btn"><span>🏟️</span> Create Match</button>
+        <button type="button" class="btn btn-secondary" onclick="closeModal('createMatchModal')">Cancel</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Correction Modal -->
+<div class="modal-backdrop" id="correctionModal">
+  <div class="modal-box" style="max-width:480px;">
+    <button class="modal-close" onclick="closeModal('correctionModal')">×</button>
+    <h2 style="font-size:1.3rem;font-weight:800;margin-bottom:1.25rem;">✏️ Correct Shot Classification</h2>
+    <p style="font-size:.85rem;color:var(--text-muted);margin-bottom:1rem;">This correction feeds back into model retraining data.</p>
+    <input type="hidden" id="corrMatchId">
+    <input type="hidden" id="corrShotId">
+    <div class="form-group"><label class="form-label">Original Classification</label><div id="corrOriginal" style="font-weight:700;color:var(--accent);font-size:1rem;"></div></div>
+    <div class="form-group"><label class="form-label">Corrected Shot Type *</label><select id="corrShotType" class="form-input"></select></div>
+    <div class="form-group"><label class="form-label">Correction Note</label><input type="text" id="corrNote" class="form-input" placeholder="e.g. was actually a Flick, not Leg Glance"></div>
+    <div style="display:flex;gap:.75rem;margin-top:1rem;">
+      <button class="btn" onclick="submitCorrection()"><span>✅</span> Save Correction</button>
+      <button class="btn btn-secondary" onclick="closeModal('correctionModal')">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── SCRIPTS ─────────────────────────────────────────────────────────────── -->
+<script>
+const API_BASE    = window.location.origin;
+const WS_PROTOCOL = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+const WS_URL      = `${WS_PROTOCOL}//${window.location.host}/ws/live-feed`;
+
+let currentUser     = null;
+let isBroadcasting  = false;
+let localStream     = null;
+let ws              = null;
+let frameSendInterval = null;
+let offscreenCanvas = document.createElement('canvas');
+let offscreenCtx    = offscreenCanvas.getContext('2d');
+let liveCanvasCtx   = document.getElementById('liveCanvas').getContext('2d');
+let lastRenderedImg = new Image();
+let currentLastData = null;
+let allMatches      = [];
+let currentUploadMatchId = null;
+let currentUploadShotId  = null;
+let shotTaxonomy    = [];
+
+// ────────────────────────────────────────────────────────────────────────────
+// 1. AUTH
+// ────────────────────────────────────────────────────────────────────────────
+function toggleAuthTab(tab) {
+  document.getElementById('formLogin').style.display    = (tab === 'login')    ? 'block' : 'none';
+  document.getElementById('formRegister').style.display = (tab === 'register') ? 'block' : 'none';
+  document.getElementById('tabSignIn').classList.toggle('active', tab === 'login');
+  document.getElementById('tabSignUp').classList.toggle('active', tab === 'register');
+  document.getElementById('authErrorMsg').style.display = 'none';
+}
+
+async function handleLogin(e) {
+  e.preventDefault();
+  try {
+    const res = await fetch(`${API_BASE}/api/auth/login`, {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ username: document.getElementById('loginUsername').value, password: document.getElementById('loginPassword').value })
+    });
+    if (!res.ok) throw new Error((await res.json()).detail || 'Login failed');
+    const data = await res.json();
+    setUserSession(data.user);
+  } catch(err) { showAuthError(err.message); }
+}
+
+async function handleRegister(e) {
+  e.preventDefault();
+  try {
+    const res = await fetch(`${API_BASE}/api/auth/register`, {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({
+        full_name: document.getElementById('regFullName').value,
+        username:  document.getElementById('regUsername').value,
+        email:     document.getElementById('regEmail').value,
+        password:  document.getElementById('regPassword').value,
+        handedness: document.getElementById('regHandedness').value,
+        batting_style: document.getElementById('regStyle').value,
+      })
+    });
+    if (!res.ok) throw new Error((await res.json()).detail || 'Registration failed');
+    setUserSession((await res.json()).user);
+  } catch(err) { showAuthError(err.message); }
+}
+
+function loginDemoUser() {
+  setUserSession({ id:'usr_demo', username:'demo', full_name:'Rohit Sharma (Demo)', batting_style:'Top Order Batsman', handedness:'Right-Handed' });
+}
+
+function showAuthError(msg) {
+  const el = document.getElementById('authErrorMsg');
+  el.textContent = msg; el.style.display = 'block';
+}
+
+function setUserSession(user) {
+  currentUser = user;
+  localStorage.setItem('cricpose_user', JSON.stringify(user));
+  document.getElementById('authOverlay').style.display = 'none';
+  document.getElementById('userNameDisplay').textContent  = user.full_name || user.username;
+  document.getElementById('userStyleDisplay').textContent = `${user.handedness||'Right-Handed'} ${user.batting_style||'Top Order'}`;
+  document.getElementById('userAvatarChar').textContent   = (user.full_name||user.username)[0].toUpperCase();
+  initApp();
+}
+
+function handleLogout() {
+  localStorage.removeItem('cricpose_user');
+  currentUser = null;
+  if (isBroadcasting) stopBroadcast();
+  document.getElementById('authOverlay').style.display = 'flex';
+}
+
+// ────────────────────────────────────────────────────────────────────────────
+// 2. INIT
+// ────────────────────────────────────────────────────────────────────────────
+async function initApp() {
+  await Promise.all([
+    loadDashboardStats(),
+    loadMatches(),
+    loadTaxonomy(),
+    loadMatchSelects(),
+  ]);
+  loadAdminBadge();
+}
+
+async function loadTaxonomy() {
+  try {
+    const res = await fetch(`${API_BASE}/api/taxonomy`);
+    if (res.ok) {
+      const d = await res.json();
+      shotTaxonomy = d.taxonomy || [];
+      // Populate taxonomy view
+      const grid = document.getElementById('taxonomyGrid');
+      if (grid) {
+        grid.innerHTML = shotTaxonomy.map(s =>
+          `<span style="background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.25);color:#a7f3d0;padding:.3rem .75rem;border-radius:20px;font-size:.82rem;font-weight:600;">🏏 ${s}</span>`
+        ).join('');
+      }
+      // Populate correction select
+      const sel = document.getElementById('corrShotType');
+      if (sel) sel.innerHTML = shotTaxonomy.map(s => `<option>${s}</option>`).join('');
+      // Populate analytics filter
+      const asel = document.getElementById('filterShotType');
+      if (asel) {
+        asel.innerHTML = '<option value="">All Shots</option>' + shotTaxonomy.map(s => `<option>${s}</option>`).join('');
+      }
+    }
+  } catch(e) { console.warn('Taxonomy load:', e); }
+}
+
+// ────────────────────────────────────────────────────────────────────────────
+// 3. NAVIGATION
+// ────────────────────────────────────────────────────────────────────────────
+const VIEW_META = {
+  overview:  { title:'Overview Dashboard',          sub:'Real-time cricket shot performance & technique metrics' },
+  matches:   { title:'Match Management',            sub:'Create, track, and review matches across all modes' },
+  analytics: { title:'Player Analytics',            sub:'Cross-match shot analysis, trends, and CSV export' },
+  live:      { title:'Live Camera Broadcast Studio',sub:'Real-time pose tracking and per-delivery classification' },
+  upload:    { title:'Video File Replay & Breakdown',sub:'Upload match footage for batch shot analysis' },
+  telemetry: { title:'Biomechanical Angle Guide',   sub:'Reference specifications for shot evaluation metrics' },
+  drills:    { title:'AI Coaching Drills',          sub:'Targeted practice drills based on your shot data' },
+  admin:     { title:'Admin & Monitoring',          sub:'Review queue, latency stats, and retraining data' },
+};
+
+function navigateTo(viewId) {
+  Object.keys(VIEW_META).forEach(v => {
+    const el = document.getElementById(`view${v.charAt(0).toUpperCase()+v.slice(1)}`);
+    if (el) el.style.display = (v === viewId) ? 'block' : 'none';
+    const btn = document.getElementById(`nav${v.charAt(0).toUpperCase()+v.slice(1)}`);
+    if (btn) btn.classList.toggle('active', v === viewId);
+  });
+  const meta = VIEW_META[viewId] || {};
+  document.getElementById('viewHeaderTitle').textContent = meta.title || 'Dashboard';
+  document.getElementById('viewHeaderSub').textContent   = meta.sub   || '';
+
+  if (viewId === 'analytics') loadAnalytics();
+  if (viewId === 'admin')     loadAdminData();
+  if (viewId === 'matches')   loadMatches();
+}
+
+// ────────────────────────────────────────────────────────────────────────────
+// 4. OVERVIEW STATS
+// ────────────────────────────────────────────────────────────────────────────
+async function loadDashboardStats() {
+  if (!currentUser) return;
+  try {
+    const [statsRes, sessRes] = await Promise.all([
+      fetch(`${API_BASE}/api/stats/${currentUser.id}`),
+      fetch(`${API_BASE}/api/sessions/${currentUser.id}`),
+    ]);
+    if (statsRes.ok) {
+      const s = await statsRes.json();
+      document.getElementById('statTotalShots').textContent  = s.total_shots || '0';
+      document.getElementById('statAvgScore').textContent    = `${s.avg_score || 0}%`;
+      document.getElementById('statFavShot').textContent     = s.favorite_shot || '—';
+      document.getElementById('statFormLabel').textContent   = s.recent_form || 'New Player';
+      renderShotDistribution(s.shot_distribution || {});
+    }
+    if (sessRes.ok) renderRecentSessions(await sessRes.json());
+
+    // Total matches count
+    const mRes = await fetch(`${API_BASE}/api/matches`);
+    if (mRes.ok) {
+      const matches = await mRes.json();
+      document.getElementById('statTotalMatches').textContent = matches.length;
+    }
+  } catch(e) { console.warn('Stats load:', e); }
+}
+
+function renderShotDistribution(dist) {
+  const container = document.getElementById('shotDistBars');
+  container.innerHTML = '';
+  const total = Object.values(dist).reduce((a,b)=>a+b,0) || 1;
+  const colors = ['var(--primary)','var(--accent)','var(--gold)','var(--purple)','var(--orange)'];
+  Object.entries(dist).slice(0,8).forEach(([shot,count],i) => {
+    const pct = Math.round((count/total)*100);
+    container.innerHTML += `
+      <div>
+        <div style="display:flex;justify-content:space-between;font-size:.82rem;margin-bottom:.25rem;">
+          <span>🏏 ${shot}</span>
+          <span style="font-weight:700;color:#fff;">${count} (${pct}%)</span>
+        </div>
+        <div class="tel-bar-bg"><div class="tel-bar-fill" style="width:${pct}%;background:${colors[i%colors.length]};"></div></div>
+      </div>`;
+  });
+  if (!Object.keys(dist).length) container.innerHTML = '<div class="empty-state"><div class="icon">🎯</div><p>No shot data yet.</p></div>';
+}
+
+function renderRecentSessions(sessions) {
+  const tbody = document.getElementById('recentSessionsTbody');
+  tbody.innerHTML = '';
+  if (!sessions?.length) {
+    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--text-muted)">No sessions yet. Analyze a video or start the live camera!</td></tr>';
+    return;
+  }
+  sessions.slice(0,6).forEach(s => {
+    const d = s.timestamp ? new Date(s.timestamp*1000).toLocaleDateString() : 'Today';
+    const qualClass = s.quality_label === 'Excellent' ? 'badge-excellent' : (s.quality_label === 'Good' ? 'badge-good' : 'badge-needs-work');
+    tbody.innerHTML += `
+      <tr>
+        <td style="font-weight:700;color:#fff;">🏏 ${s.shot_type||'Cover Drive'}</td>
+        <td><span class="badge ${qualClass}">${s.quality_score||94}% · ${s.quality_label||'Good'}</span></td>
+        <td style="color:var(--text-muted);font-size:.82rem;">${s.source||'Live Feed'}</td>
+        <td style="font-size:.8rem;color:#cbd5e1;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${s.feedback||'Optimal alignment.'}</td>
+        <td style="color:var(--text-muted);font-size:.8rem;">${d}</td>
+      </tr>`;
+  });
+}
+
+// ────────────────────────────────────────────────────────────────────────────
+// 5. MATCH MANAGEMENT
+// ────────────────────────────────────────────────────────────────────────────
+async function loadMatches() {
+  const filter = document.getElementById('matchStatusFilter')?.value || '';
+  try {
+    const url = filter ? `${API_BASE}/api/matches?status=${filter}` : `${API_BASE}/api/matches`;
+    const res = await fetch(url);
+    if (!res.ok) return;
+    allMatches = await res.json();
+    renderMatchList(allMatches);
+    updateMatchSelects();
+  } catch(e) { console.warn('Matches load:', e); }
+}
+
+function renderMatchList(matches) {
+  const container = document.getElementById('matchListContainer');
+  if (!container) return;
+  if (!matches.length) {
+    container.innerHTML = '<div class="empty-state"><div class="icon">🏟️</div><p>No matches yet. Create your first match to get started!</p></div>';
+    return;
+  }
+  const statusBadge = s => {
+    if (s==='live')      return '<span class="badge badge-live"><span class="pulse-dot"></span> Live</span>';
+    if (s==='upcoming')  return '<span class="badge badge-upcoming">⏳ Upcoming</span>';
+    return '<span class="badge badge-completed">✅ Completed</span>';
+  };
+  container.innerHTML = `
+    <table class="data-table">
+      <thead><tr><th>Match</th><th>Format</th><th>Venue</th><th>Status</th><th>Deliveries</th><th>Created</th><th>Actions</th></tr></thead>
+      <tbody>
+        ${matches.map(m => `
+          <tr>
+            <td>
+              <div style="font-weight:700;color:#fff;">${m.title}</div>
+              <div style="font-size:.78rem;color:var(--text-muted);">${m.team_a||''}${m.team_a&&m.team_b?' vs ':''} ${m.team_b||''}</div>
+            </td>
+            <td><span class="badge" style="background:rgba(255,255,255,.06);border:1px solid var(--border-color);color:var(--text-main);">${m.format}</span></td>
+            <td style="color:var(--text-muted);font-size:.82rem;">${m.venue||'—'}</td>
+            <td>${statusBadge(m.status)}</td>
+            <td style="font-family:'JetBrains Mono',monospace;font-weight:700;">${m.total_deliveries||0}</td>
+            <td style="color:var(--text-muted);font-size:.8rem;">${new Date(m.created_at*1000).toLocaleDateString()}</td>
+            <td>
+              <div style="display:flex;gap:.5rem;flex-wrap:wrap;">
+                <button class="btn btn-sm btn-secondary" onclick="viewMatchShots('${m.id}','${escHtml(m.title)}')">📋 Shots</button>
+                ${m.status==='upcoming'?`<button class="btn btn-sm" onclick="setMatchStatus('${m.id}','live')">▶ Go Live</button>`:''}
+                ${m.status==='live'?`<button class="btn btn-sm btn-danger" onclick="setMatchStatus('${m.id}','completed')">⏹ End</button>`:''}
+                <button class="btn btn-sm btn-secondary" onclick="downloadMatchCSV('${m.id}')">📥 CSV</button>
+              </div>
+            </td>
+          </tr>`).join('')}
+      </tbody>
+    </table>`;
+}
+
+function openCreateMatchModal() {
+  document.getElementById('formCreateMatch').reset();
+  openModal('createMatchModal');
+}
+
+async function handleCreateMatch(e) {
+  e.preventDefault();
+  try {
+    const res = await fetch(`${API_BASE}/api/matches`, {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({
+        title:      document.getElementById('matchTitle').value,
+        team_a:     document.getElementById('matchTeamA').value,
+        team_b:     document.getElementById('matchTeamB').value,
+        format:     document.getElementById('matchFormat').value,
+        venue:      document.getElementById('matchVenue').value,
+        created_by: currentUser?.id || '',
+        players:    currentUser ? [currentUser.id] : [],
+      })
+    });
+    if (!res.ok) throw new Error((await res.json()).detail);
+    closeModal('createMatchModal');
+    await loadMatches();
+  } catch(e) { alert(e.message); }
+}
+
+async function setMatchStatus(matchId, status) {
+  try {
+    await fetch(`${API_BASE}/api/matches/${matchId}/status`, {
+      method:'PATCH', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ status })
+    });
+    await loadMatches();
+  } catch(e) { alert(e.message); }
+}
+
+async function viewMatchShots(matchId, title) {
+  try {
+    const res = await fetch(`${API_BASE}/api/matches/${matchId}/shots`);
+    if (!res.ok) throw new Error('Failed to load shots');
+    const shots = await res.json();
+    // Render in the upload view's shot report
+    currentUploadMatchId = matchId;
+    navigateTo('upload');
+    renderShotReportTable(shots, matchId);
+    document.getElementById('uploadShotReportCard').style.display = 'block';
+  } catch(e) { alert(e.message); }
+}
+
+async function downloadMatchCSV(matchId) {
+  window.open(`${API_BASE}/api/analytics/match/${matchId}/export`, '_blank');
+}
+
+async function exportCurrentMatchCSV() {
+  if (currentUploadMatchId) downloadMatchCSV(currentUploadMatchId);
+  else if (currentUser) window.open(`${API_BASE}/api/analytics/player/${currentUser.id}/export`, '_blank');
+}
+
+function updateMatchSelects() {
+  const selects = ['livematchSelect', 'uploadMatchSelect'];
+  selects.forEach(id => {
+    const sel = document.getElementById(id);
+    if (!sel) return;
+    const currentVal = sel.value;
+    sel.innerHTML = `<option value="">— No Match Selected —</option>` +
+      allMatches.map(m => `<option value="${m.id}" ${m.id===currentVal?'selected':''}>${m.title} (${m.status})</option>`).join('');
+  });
+}
+
+async function loadMatchSelects() {
+  await loadMatches();
+}
+
+// ────────────────────────────────────────────────────────────────────────────
+// 6. ANALYTICS
+// ────────────────────────────────────────────────────────────────────────────
+async function loadAnalytics() {
+  if (!currentUser) return;
+  const shotType = document.getElementById('filterShotType')?.value || '';
+  const nDays    = document.getElementById('filterPeriod')?.value   || 30;
+
+  const params = new URLSearchParams();
+  if (shotType) params.set('shot_type', shotType);
+
+  try {
+    const [profileRes, trendsRes] = await Promise.all([
+      fetch(`${API_BASE}/api/analytics/player/${currentUser.id}?${params}`),
+      fetch(`${API_BASE}/api/analytics/player/${currentUser.id}/trends?n_days=${nDays}`),
+    ]);
+
+    if (profileRes.ok) {
+      const p = await profileRes.json();
+      renderAnalyticsStats(p);
+      renderAnalyticsDist('analyticsShotDist', p.shot_distribution||{});
+      renderAnalyticsDist('analyticsZoneDist', p.zone_distribution||{}, ['var(--accent)','var(--purple)','var(--gold)','var(--orange)']);
+      renderAnalyticsShotsTable(p.recent_shots||[]);
+    }
+
+    if (trendsRes.ok) {
+      const t = await trendsRes.json();
+      renderTrendChart(t);
+    }
+  } catch(e) { console.warn('Analytics load:', e); }
+}
+
+function renderAnalyticsStats(p) {
+  const grid = document.getElementById('analyticsStatsGrid');
+  if (!grid) return;
+  const cards = [
+    { icon:'🎯', title:'Total Shots',  val:p.total_shots,       sub:'Across all matches',          color:'var(--primary)' },
+    { icon:'📊', title:'Avg Quality',  val:`${p.avg_quality_score}%`, sub:p.recent_form||'',       color:'var(--primary)' },
+    { icon:'🏏', title:'Favorite Shot',val:p.favorite_shot,     sub:'Most frequent shot type',     color:'var(--accent)' },
+    { icon:'🔧', title:'Correction Rate',val:`${(p.correction_rate*100).toFixed(1)}%`, sub:'Model accuracy proxy', color:'var(--gold)' },
+  ];
+  grid.innerHTML = cards.map(c => `
+    <div class="stat-card">
+      <div class="stat-icon">${c.icon}</div>
+      <span class="stat-title">${c.title}</span>
+      <div class="stat-val" style="color:${c.color};">${c.val||'—'}</div>
+      <div class="stat-sub">${c.sub}</div>
+    </div>`).join('');
+}
+
+function renderAnalyticsDist(containerId, dist, colors) {
+  const container = document.getElementById(containerId);
+  if (!container) return;
+  const total = Object.values(dist).reduce((a,b)=>a+b,0)||1;
+  const cols   = colors || ['var(--primary)','var(--accent)','var(--gold)','var(--purple)','var(--orange)'];
+  container.innerHTML = '';
+  const entries = Object.entries(dist).sort((a,b)=>b[1]-a[1]).slice(0,8);
+  if (!entries.length) { container.innerHTML='<div class="empty-state"><div class="icon">📊</div><p>No data yet.</p></div>'; return; }
+  entries.forEach(([label,count],i) => {
+    const pct = Math.round((count/total)*100);
+    container.innerHTML += `
+      <div>
+        <div style="display:flex;justify-content:space-between;font-size:.8rem;margin-bottom:.2rem;">
+          <span>${label}</span><span style="font-weight:700;color:#fff;">${count} (${pct}%)</span>
+        </div>
+        <div class="tel-bar-bg"><div class="tel-bar-fill" style="width:${pct}%;background:${cols[i%cols.length]};"></div></div>
+      </div>`;
+  });
+}
+
+function renderTrendChart(t) {
+  const canvas = document.getElementById('trendCanvas');
+  const empty  = document.getElementById('trendEmpty');
+  const days   = t.trend_days || [];
+  const scores = t.daily_avg_quality || {};
+
+  if (!days.length) {
+    canvas.style.display = 'none';
+    empty.style.display  = 'block';
+    return;
+  }
+  canvas.style.display = 'block';
+  empty.style.display  = 'none';
+
+  const ctx = canvas.getContext('2d');
+  const W   = canvas.parentElement.clientWidth - 48;
+  const H   = 140;
+  canvas.width  = W;
+  canvas.height = H;
+
+  const vals = days.map(d => scores[d] || 0);
+  const minV = Math.max(0, Math.min(...vals) - 5);
+  const maxV = Math.min(100, Math.max(...vals) + 5);
+  const xStep = W / Math.max(1, days.length - 1);
+  const yScale = H / (maxV - minV);
+
+  ctx.clearRect(0, 0, W, H);
+
+  // Grid lines
+  ctx.strokeStyle = 'rgba(255,255,255,.06)';
+  ctx.lineWidth = 1;
+  [0.25, 0.5, 0.75, 1].forEach(f => {
+    const y = H - f * H;
+    ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(W,y); ctx.stroke();
+  });
+
+  // Gradient fill
+  const grad = ctx.createLinearGradient(0, 0, 0, H);
+  grad.addColorStop(0, 'rgba(34, 229, 139, .35)');
+  grad.addColorStop(1, 'rgba(34, 229, 139, .02)');
+
+  ctx.beginPath();
+  vals.forEach((v,i) => {
+    const x = i * xStep;
+    const y = H - (v - minV) * yScale;
+    i === 0 ? ctx.moveTo(x,y) : ctx.lineTo(x,y);
+  });
+  ctx.lineTo((vals.length-1)*xStep, H);
+  ctx.lineTo(0, H);
+  ctx.closePath();
+  ctx.fillStyle = grad;
+  ctx.fill();
+
+  // Line
+  ctx.beginPath();
+  ctx.strokeStyle = 'rgba(34, 229, 139, 1)';
+  ctx.lineWidth = 2.5;
+  vals.forEach((v,i) => {
+    const x = i * xStep;
+    const y = H - (v - minV) * yScale;
+    i === 0 ? ctx.moveTo(x,y) : ctx.lineTo(x,y);
+  });
+  ctx.stroke();
+
+  // Dots
+  vals.forEach((v,i) => {
+    const x = i * xStep;
+    const y = H - (v - minV) * yScale;
+    ctx.beginPath();
+    ctx.arc(x, y, 4, 0, Math.PI*2);
+    ctx.fillStyle = '#22E58B';
+    ctx.fill();
+  });
+}
+
+function renderAnalyticsShotsTable(shots) {
+  const tbody = document.getElementById('analyticsShotsTbody');
+  if (!tbody) return;
+  tbody.innerHTML = '';
+  if (!shots.length) {
+    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--text-muted);">No shots recorded yet.</td></tr>';
+    return;
+  }
+  shots.forEach(s => {
+    const qClass = s.quality_label==='Excellent'?'badge-excellent':(s.quality_label==='Good'?'badge-good':'badge-needs-work');
+    const confPct = s.confidence ? `${(s.confidence*100).toFixed(1)}%` : '—';
+    const corrected = s.corrected ? `<span class="badge badge-good">✔ ${s.corrected_shot_type||''}</span>` : '—';
+    tbody.innerHTML += `
+      <tr>
+        <td style="font-weight:700;color:#fff;">🏏 ${s.shot_type||'—'}</td>
+        <td><span class="badge ${qClass}">${s.quality_label||'—'}</span></td>
+        <td style="font-family:'JetBrains Mono',monospace;">${confPct}</td>
+        <td style="color:var(--text-muted);font-size:.82rem;">${s.zone||'—'}</td>
+        <td style="color:var(--text-muted);font-size:.82rem;">${s.source||'—'}</td>
+        <td>${corrected}</td>
+        <td style="color:var(--text-muted);font-size:.8rem;">${s.timestamp?new Date(s.timestamp*1000).toLocaleDateString():'—'}</td>
+      </tr>`;
+  });
+}
+
+async function exportPlayerCSV() {
+  if (!currentUser) return;
+  window.open(`${API_BASE}/api/analytics/player/${currentUser.id}/export`, '_blank');
+}
+
+// ────────────────────────────────────────────────────────────────────────────
+// 7. LIVE CAMERA STUDIO
+// ────────────────────────────────────────────────────────────────────────────
+async function initCameraDevices() {
+  try {
+    const select = document.getElementById('cameraSelect');
+    const devices = await navigator.mediaDevices.enumerateDevices();
+    const videoDevices = devices.filter(d => d.kind === 'videoinput');
+    select.innerHTML = '';
+    if (!videoDevices.length) { select.innerHTML = '<option value="">Default Webcam</option>'; return; }
+    videoDevices.forEach((device, idx) => {
+      const opt = document.createElement('option');
+      opt.value = device.deviceId;
+      opt.text  = device.label || `Camera ${idx+1}`;
+      select.appendChild(opt);
+    });
+  } catch(e) { console.warn('Camera enum:', e); }
+}
+
+async function toggleBroadcast() {
+  isBroadcasting ? stopBroadcast() : await startBroadcast();
+}
+
+async function startBroadcast() {
+  try {
+    const sel = document.getElementById('cameraSelect');
+    const constraints = {
+      video:{ deviceId: sel.value ? {exact:sel.value}:undefined, width:{ideal:1280}, height:{ideal:720} },
+      audio: false
+    };
+    const webcam = document.getElementById('webcamVideo');
+    localStream = await navigator.mediaDevices.getUserMedia(constraints);
+    webcam.srcObject = localStream;
+    await webcam.play();
+
+    // If a match is selected, start it live
+    const matchSel = document.getElementById('livematchSelect');
+    if (matchSel?.value) {
+      await fetch(`${API_BASE}/api/live/${matchSel.value}/start`, { method:'POST' });
+    }
+
+    initWebSocket();
+    isBroadcasting = true;
+    document.getElementById('btnToggleBroadcast').innerHTML = '<span>⏹</span> Stop Broadcast';
+    document.getElementById('btnToggleBroadcast').className = 'btn btn-sm btn-danger';
+    document.getElementById('btnSnapshot').disabled = false;
+    document.getElementById('stagePlaceholder').style.display = 'none';
+    document.getElementById('topOnAirBadge').style.display = 'inline-flex';
+    document.getElementById('liveLogBadge').style.display = 'inline-flex';
+    document.getElementById('liveLogEmpty').style.display  = 'none';
+  } catch(err) {
+    alert(`Camera Feed Error: ${err.message}`);
+    stopBroadcast();
+  }
+}
+
+function stopBroadcast() {
+  isBroadcasting = false;
+  if (localStream) { localStream.getTracks().forEach(t=>t.stop()); localStream=null; }
+  if (frameSendInterval) { clearInterval(frameSendInterval); frameSendInterval=null; }
+  if (ws) { ws.close(); ws=null; }
+
+  document.getElementById('btnToggleBroadcast').innerHTML = '<span>🔴</span> Start Live Broadcast';
+  document.getElementById('btnToggleBroadcast').className = 'btn btn-sm';
+  document.getElementById('btnSnapshot').disabled = true;
+  document.getElementById('stagePlaceholder').style.display = 'block';
+  document.getElementById('topOnAirBadge').style.display = 'none';
+  document.getElementById('liveLogBadge').style.display  = 'none';
+
+  const matchSel = document.getElementById('livematchSelect');
+  if (matchSel?.value) {
+    fetch(`${API_BASE}/api/live/${matchSel.value}/stop`, { method:'POST' }).catch(()=>{});
+  }
+}
+
+function initWebSocket() {
+  ws = new WebSocket(WS_URL);
+  ws.onopen = () => { startFrameCaptureLoop(); };
+  ws.onmessage = (e) => {
+    try {
+      const data = JSON.parse(e.data);
+      updateLiveTelemetry(data);
+      if (data.type === 'delivery' && data.delivery_event) {
+        appendDeliveryToLog(data.delivery_event, data.delivery_no);
+      }
+    } catch(err) {}
+  };
+  ws.onclose = () => { if (isBroadcasting) stopBroadcast(); };
+}
+
+function startFrameCaptureLoop() {
+  const webcam = document.getElementById('webcamVideo');
+  if (frameSendInterval) clearInterval(frameSendInterval);
+  const matchSel  = document.getElementById('livematchSelect');
+  const matchId   = matchSel?.value || null;
+  const playerId  = currentUser?.id || null;
+
+  frameSendInterval = setInterval(() => {
+    if (!isBroadcasting || !ws || ws.readyState !== WebSocket.OPEN) return;
+    if (!webcam.videoWidth || !webcam.videoHeight) return;
+
+    offscreenCanvas.width  = Math.min(webcam.videoWidth, 854);
+    offscreenCanvas.height = Math.min(webcam.videoHeight, 480);
+    offscreenCtx.drawImage(webcam, 0, 0, offscreenCanvas.width, offscreenCanvas.height);
+
+    ws.send(JSON.stringify({
+      image:          offscreenCanvas.toDataURL('image/jpeg', 0.72),
+      mirror:         document.getElementById('chkMirror').checked,
+      render_overlay: document.getElementById('chkHUD').checked,
+      client_time:    performance.now(),
+      match_id:       matchId,
+      player_id:      playerId,
+    }));
+  }, 40);
+}
+
+function updateLiveTelemetry(data) {
+  currentLastData = data;
+  const canvas = document.getElementById('liveCanvas');
+  if (data.image) {
+    lastRenderedImg.onload = () => {
+      canvas.width  = lastRenderedImg.width;
+      canvas.height = lastRenderedImg.height;
+      liveCanvasCtx.drawImage(lastRenderedImg, 0, 0);
+    };
+    lastRenderedImg.src = data.image;
+  }
+
+  if (data.shot_type) {
+    const sName = data.shot_type.shot_type || 'Cover Drive';
+    const sConf = ((data.shot_type.confidence||0)*100).toFixed(1);
+    document.getElementById('liveShotName').textContent = `🏏 ${sName}`;
+    document.getElementById('liveShotConf').textContent = `${sConf}%`;
+  }
+
+  const m = data.metrics;
+  if (m) {
+    document.getElementById('valElbow').textContent = `${(m.elbow_angle||0).toFixed(1)}°`;
+    document.getElementById('barElbow').style.width = `${Math.min(100,(m.elbow_angle||0)/180*100)}%`;
+    document.getElementById('valSpine').textContent = `${(m.spine_lean||0).toFixed(1)}°`;
+    document.getElementById('barSpine').style.width = `${Math.min(100,(m.spine_lean||0)/180*100)}%`;
+    document.getElementById('valHead').textContent  = (m.head_over_knee||0).toFixed(3);
+    document.getElementById('barHead').style.width  = `${Math.min(100,(1-(m.head_over_knee||0)/0.25)*100)}%`;
+    document.getElementById('valFoot').textContent  = `${(m.foot_direction||0).toFixed(1)}°`;
+    document.getElementById('barFoot').style.width  = `${Math.min(100,(m.foot_direction||0)/180*100)}%`;
+  }
+
+  if (data.coaching_tip) document.getElementById('liveCoachText').textContent = data.coaching_tip;
+  if (data.fps)          document.getElementById('liveFPS').textContent = data.fps;
+  if (data.wrist_speed !== undefined) document.getElementById('liveWristSpeed').textContent = data.wrist_speed.toFixed(4);
+  if (data.delivery_no !== undefined) document.getElementById('liveDeliveryNo').textContent = data.delivery_no;
+}
+
+function appendDeliveryToLog(event, deliveryNo) {
+  const tbody = document.getElementById('liveDeliveryLog');
+  const conf  = ((event.confidence||0)*100).toFixed(1);
+  const qClass = event.quality_label==='Excellent'?'badge-excellent':(event.quality_label==='Good'?'badge-good':'badge-needs-work');
+  const latency = event.latency_ms != null ? `${event.latency_ms}ms` : '—';
+  const shotId  = event.shot_id || '';
+  const matchId = event.match?.match_id || document.getElementById('livematchSelect')?.value || '';
+
+  const row = document.createElement('tr');
+  row.className = 'delivery-row-new';
+  row.innerHTML = `
+    <td style="font-family:'JetBrains Mono',monospace;font-weight:700;">${deliveryNo}</td>
+    <td style="font-weight:700;color:#fff;">🏏 ${event.shot_type}</td>
+    <td><span class="badge ${qClass}">${event.quality_label}</span></td>
+    <td style="font-family:'JetBrains Mono',monospace;">${conf}%</td>
+    <td style="color:var(--text-muted);font-size:.82rem;">${event.zone||'—'}</td>
+    <td style="font-family:'JetBrains Mono',monospace;color:${(event.latency_ms||0)>3000?'var(--red)':'var(--primary)'};">${latency}</td>
+    <td>${shotId&&matchId?`<button class="btn btn-sm btn-secondary" onclick="openCorrectionModal('${matchId}','${shotId}','${event.shot_type}')">✏️ Correct</button>`:'—'}</td>
+  `;
+  tbody.insertBefore(row, tbody.firstChild);
+
+  // Keep only last 50 rows
+  while (tbody.children.length > 50) tbody.removeChild(tbody.lastChild);
+}
+
+// ────────────────────────────────────────────────────────────────────────────
+// 8. SNAPSHOT
+// ────────────────────────────────────────────────────────────────────────────
+async function captureSnapshot() {
+  if (!lastRenderedImg.src) return;
+  try {
+    const matchId = document.getElementById('livematchSelect')?.value || null;
+    const res = await fetch(`${API_BASE}/live/snapshot`, {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ image: lastRenderedImg.src, user_id: currentUser?.id, match_id: matchId, shot_type_override: currentLastData?.shot_type?.shot_type })
+    });
+    if (!res.ok) throw new Error('Snapshot failed');
+    const data = await res.json();
+
+    document.getElementById('modalSnapImg').src         = `${API_BASE}/video/${encodeURIComponent(data.filename)}`;
+    document.getElementById('modalShotName').textContent = data.shot_type?.shot_type || 'Cover Drive';
+    document.getElementById('modalQualityScore').textContent = `${data.quality?.label} · ${data.quality?.confidence ? (data.quality.confidence*100).toFixed(0)+'%' : '—'}`;
+    document.getElementById('modalCoachText').textContent    = data.coaching_advice || 'Excellent form!';
+
+    const m = data.metrics || {};
+    document.getElementById('modalMetricsList').innerHTML = `
+      ${metricRow('Lead Elbow Angle', `${(m.elbow_angle||135).toFixed(1)}°`, '(Ideal 100°–155°)')}
+      ${metricRow('Spine Posture',    `${(m.spine_lean||89).toFixed(1)}°`,   '(Ideal 85°–95°)')}
+      ${metricRow('Head/Knee Offset', `${(m.head_over_knee||0.04).toFixed(3)}`, '(Ideal < 0.10)')}
+      ${metricRow('Foot Alignment',   `${(m.foot_direction||90).toFixed(1)}°`, '(80°–100°)')}`;
+
+    openModal('snapshotModal');
+    loadDashboardStats();
+  } catch(err) { alert(err.message); }
+}
+
+function metricRow(label, val, hint) {
+  return `<div style="display:flex;justify-content:space-between;font-size:.84rem;padding:.35rem 0;border-bottom:1px solid rgba(255,255,255,.05);">
+    <span style="color:var(--text-muted);">${label}</span>
+    <span style="font-weight:700;color:#fff;">${val} <span style="font-weight:400;color:var(--text-muted);font-size:.78rem;">${hint}</span></span>
+  </div>`;
+}
+
+// ────────────────────────────────────────────────────────────────────────────
+// 9. VIDEO UPLOAD
+// ────────────────────────────────────────────────────────────────────────────
+document.getElementById('fileUploadInput').addEventListener('change', async (e) => {
+  if (!e.target.files.length) return;
+  const matchId = document.getElementById('uploadMatchSelect')?.value || null;
+  const formData = new FormData();
+  formData.append('file', e.target.files[0]);
+  if (currentUser) formData.append('user_id', currentUser.id);
+  if (matchId)     formData.append('match_id', matchId);
+
+  document.getElementById('uploadSpinner').style.display = 'block';
+  try {
+    const res = await fetch(`${API_BASE}/upload/`, { method:'POST', body: formData });
+    if (!res.ok) throw new Error('Video upload failed');
+    const data = await res.json();
+    currentUploadMatchId = data.match_id || matchId;
+    currentUploadShotId  = data.shot_id  || null;
+    renderFileResults(data);
+    if (currentUploadMatchId) await loadMatchShotsIntoReport(currentUploadMatchId);
+    loadDashboardStats();
+  } catch(err) { alert(err.message); }
+  finally { document.getElementById('uploadSpinner').style.display = 'none'; }
+});
+
+async function loadSampleVideo(stem) {
+  try {
+    const res = await fetch(`${API_BASE}/results/${encodeURIComponent(stem)}`);
+    if (!res.ok) throw new Error(`Sample result for ${stem} not found`);
+    renderFileResults(await res.json());
+  } catch(err) { alert(err.message); }
+}
+
+function renderFileResults(data) {
+  const fn = data.annotated_video_filename || data.filename;
+  const player = document.getElementById('fileVideoPlayer');
+  if (fn) {
+    player.src = `${API_BASE}/video/${encodeURIComponent(fn)}`;
+    player.style.display = 'block';
+    document.getElementById('filePlaceholder').style.display = 'none';
+    player.play().catch(()=>{});
+  }
+  document.getElementById('fileScoreBanner').style.display = 'flex';
+  if (data.shot_type) document.getElementById('fileShotTypeTag').textContent = data.shot_type?.shot_type || data.shot_type || 'Cover Drive';
+  const q = data.ml_prediction || data.quality || {};
+  document.getElementById('fileQualityScore').textContent = `${q.label||'Good'} · ${((q.confidence||0.88)*100).toFixed(0)}%`;
+}
+
+async function loadMatchShotsIntoReport(matchId) {
+  try {
+    const res = await fetch(`${API_BASE}/api/matches/${matchId}/shots`);
+    if (!res.ok) return;
+    const shots = await res.json();
+    renderShotReportTable(shots, matchId);
+    document.getElementById('uploadShotReportCard').style.display = 'block';
+  } catch(e) {}
+}
+
+function renderShotReportTable(shots, matchId) {
+  const tbody = document.getElementById('uploadShotReportTbody');
+  tbody.innerHTML = '';
+  if (!shots.length) {
+    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--text-muted);">No shots recorded for this match yet.</td></tr>';
+    return;
+  }
+  shots.forEach(s => {
+    const conf  = s.confidence ? `${(s.confidence*100).toFixed(1)}%` : '—';
+    const qClass = s.quality_label==='Excellent'?'badge-excellent':(s.quality_label==='Good'?'badge-good':'badge-needs-work');
+    const corrLabel = s.corrected ? `<span class="badge badge-good">✔ ${s.corrected_shot_type}</span>` : '';
+    tbody.innerHTML += `
+      <tr>
+        <td style="font-weight:700;color:#fff;">🏏 ${s.shot_type||'—'} ${corrLabel}</td>
+        <td style="font-family:'JetBrains Mono',monospace;">${conf}</td>
+        <td><span class="badge ${qClass}">${s.quality_label||'—'}</span></td>
+        <td style="color:var(--text-muted);font-size:.82rem;">${s.zone||'—'}</td>
+        <td><button class="btn btn-sm btn-secondary" onclick="openCorrectionModal('${matchId}','${s.id}','${s.shot_type}')">✏️ Correct</button></td>
+      </tr>`;
+  });
+  document.getElementById('uploadMatchShotId').textContent = `Match: ${matchId}`;
+  document.getElementById('uploadMatchShotId').style.display = 'inline';
+}
+
+// ────────────────────────────────────────────────────────────────────────────
+// 10. CORRECTION MODAL
+// ────────────────────────────────────────────────────────────────────────────
+function openCorrectionModal(matchId, shotId, originalShot) {
+  document.getElementById('corrMatchId').value   = matchId;
+  document.getElementById('corrShotId').value    = shotId;
+  document.getElementById('corrOriginal').textContent = originalShot;
+  // Select current shot type in the dropdown
+  const sel = document.getElementById('corrShotType');
+  const idx = [...sel.options].findIndex(o => o.value === originalShot);
+  if (idx >= 0) sel.selectedIndex = idx;
+  openModal('correctionModal');
+}
+
+async function submitCorrection() {
+  const matchId  = document.getElementById('corrMatchId').value;
+  const shotId   = document.getElementById('corrShotId').value;
+  const corrType = document.getElementById('corrShotType').value;
+  const note     = document.getElementById('corrNote').value;
+
+  try {
+    const res = await fetch(`${API_BASE}/api/matches/${matchId}/shots/${shotId}/correct`, {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ corrected_shot_type: corrType, correction_note: note })
+    });
+    if (!res.ok) throw new Error((await res.json()).detail);
+    closeModal('correctionModal');
+    // Refresh the table in context
+    if (currentUploadMatchId) await loadMatchShotsIntoReport(currentUploadMatchId);
+    loadAdminBadge();
+  } catch(e) { alert(e.message); }
+}
+
+// ────────────────────────────────────────────────────────────────────────────
+// 11. ADMIN / MONITORING
+// ────────────────────────────────────────────────────────────────────────────
+async function loadAdminBadge() {
+  try {
+    const res = await fetch(`${API_BASE}/api/admin/review-queue?status=pending&limit=200`);
+    if (res.ok) {
+      const d = await res.json();
+      const n = d.stats?.pending || 0;
+      const badge = document.getElementById('adminBadge');
+      badge.textContent   = n;
+      badge.style.display = n > 0 ? 'inline-block' : 'none';
+    }
+  } catch(e) {}
+}
+
+async function loadAdminData() {
+  const status = document.getElementById('reviewQueueFilter')?.value || 'pending';
+  try {
+    const [qRes, latRes] = await Promise.all([
+      fetch(`${API_BASE}/api/admin/review-queue?status=${status}&limit=100`),
+      fetch(`${API_BASE}/api/admin/latency`),
+    ]);
+
+    if (qRes.ok) {
+      const d = await qRes.json();
+      renderAdminStats(d.stats||{});
+      renderReviewQueue(d.items||[]);
+    }
+
+    if (latRes.ok) {
+      const latData = await latRes.json();
+      renderLatencyTable(latData);
+    }
+  } catch(e) { console.warn('Admin load:', e); }
+}
+
+function renderAdminStats(stats) {
+  const grid = document.getElementById('adminStatsGrid');
+  if (!grid) return;
+  grid.innerHTML = `
+    <div class="stat-card"><div class="stat-icon">🚩</div><span class="stat-title">Total Flagged</span><div class="stat-val" style="color:var(--red);">${stats.total_flagged||0}</div><div class="stat-sub">Low-confidence shots</div></div>
+    <div class="stat-card"><div class="stat-icon">⏳</div><span class="stat-title">Pending Review</span><div class="stat-val" style="color:var(--gold);">${stats.pending||0}</div><div class="stat-sub">Awaiting human review</div></div>
+    <div class="stat-card"><div class="stat-icon">✅</div><span class="stat-title">Reviewed</span><div class="stat-val" style="color:var(--primary);">${stats.reviewed||0}</div><div class="stat-sub">Ready for retraining</div></div>
+    <div class="stat-card"><div class="stat-icon">🔁</div><span class="stat-title">Correction Rate</span><div class="stat-val" style="color:var(--accent);">${((stats.correction_rate||0)*100).toFixed(1)}%</div><div class="stat-sub">of flagged shots corrected</div></div>`;
+}
+
+function renderReviewQueue(items) {
+  const tbody = document.getElementById('reviewQueueTbody');
+  const empty = document.getElementById('reviewQueueEmpty');
+  tbody.innerHTML = '';
+  if (!items.length) { empty.style.display='block'; return; }
+  empty.style.display = 'none';
+  items.forEach(item => {
+    const conf = item.confidence ? `${(item.confidence*100).toFixed(1)}%` : '—';
+    const date = item.queued_at ? new Date(item.queued_at*1000).toLocaleDateString() : '—';
+    tbody.innerHTML += `
+      <tr>
+        <td style="font-family:'JetBrains Mono',monospace;font-size:.78rem;color:var(--text-muted);">${item.id}</td>
+        <td style="font-weight:700;color:#fff;">🏏 ${item.shot_type}</td>
+        <td><span class="badge badge-low-conf">${conf}</span></td>
+        <td style="font-size:.78rem;color:var(--text-muted);">${item.match_id||'—'}</td>
+        <td style="font-size:.78rem;color:var(--text-muted);">${date}</td>
+        <td>
+          <div style="display:flex;gap:.5rem;">
+            <button class="btn btn-sm" onclick="openCorrectionModal('${item.match_id||''}','${item.id}','${item.shot_type}')">✏️ Correct</button>
+            <button class="btn btn-sm btn-secondary" onclick="dismissReview('${item.id}')">Dismiss</button>
+          </div>
+        </td>
+      </tr>`;
+  });
+}
+
+async function dismissReview(shotId) {
+  try {
+    await fetch(`${API_BASE}/api/admin/review-queue/${shotId}/resolve`, {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ action:'dismissed' })
+    });
+    loadAdminData();
+    loadAdminBadge();
+  } catch(e) {}
+}
+
+function renderLatencyTable(data) {
+  const tbody = document.getElementById('latencyTbody');
+  const empty = document.getElementById('latencyEmpty');
+  tbody.innerHTML = '';
+  if (!data.length) { empty.style.display='block'; return; }
+  empty.style.display = 'none';
+  data.forEach(s => {
+    const metColor = s.target_met ? 'var(--primary)' : 'var(--red)';
+    tbody.innerHTML += `
+      <tr>
+        <td style="font-family:'JetBrains Mono',monospace;font-size:.78rem;color:var(--text-muted);">${s.match_id}</td>
+        <td>${s.samples}</td>
+        <td style="font-family:'JetBrains Mono',monospace;">${s.avg_ms||'—'}</td>
+        <td style="font-family:'JetBrains Mono',monospace;">${s.p50_ms||'—'}</td>
+        <td style="font-family:'JetBrains Mono',monospace;">${s.p95_ms||'—'}</td>
+        <td style="font-family:'JetBrains Mono',monospace;">${s.max_ms||'—'}</td>
+        <td style="font-weight:700;color:${metColor};">${s.target_met ? '✅ Yes' : '❌ No'}</td>
+      </tr>`;
+  });
+}
+
+// ────────────────────────────────────────────────────────────────────────────
+// 12. UTILITIES
+// ────────────────────────────────────────────────────────────────────────────
+function openModal(id)  { document.getElementById(id).classList.add('active'); }
+function closeModal(id) { document.getElementById(id).classList.remove('active'); }
+// Legacy alias kept
+function closeSnapshotModal() { closeModal('snapshotModal'); }
+
+function escHtml(str) {
+  return String(str).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+}
+
+// ────────────────────────────────────────────────────────────────────────────
+// 13. PAGE INIT
+// ────────────────────────────────────────────────────────────────────────────
+window.addEventListener('DOMContentLoaded', () => {
+  const savedUser = localStorage.getItem('cricpose_user');
+  if (savedUser) {
+    try { setUserSession(JSON.parse(savedUser)); } catch(e) { handleLogout(); }
+  }
+  initCameraDevices();
+});
+</script>
+</body>
+</html>
