@@ -1075,6 +1075,7 @@
         <p id="viewHeaderSub" style="font-size:.8rem;color:var(--text-muted);">Real-time cricket shot performance & technique metrics</p>
       </div>
       <div style="display:flex;align-items:center;gap:1rem;">
+        <button class="sample-pill" id="backendPill" onclick="promptBackendUrl()" title="Click to view or change Render Backend API URL" style="display:inline-flex;align-items:center;gap:.4rem;padding:.35rem .75rem;font-size:.76rem;border-radius:20px;cursor:pointer;"><span id="backendDot" style="width:7px;height:7px;border-radius:50%;background:#22E58B;box-shadow:0 0 6px #22E58B;"></span><span id="backendLabel">API Online</span></button>
         <div class="badge badge-live" id="topOnAirBadge" style="display:none;"><span class="pulse-dot"></span><span>ON-AIR LIVE</span></div>
         <button class="btn btn-sm" onclick="navigateTo('live');startBroadcast();"><span>🔴</span> Launch Live Camera</button>
       </div>
@@ -1457,9 +1458,51 @@
 
 <!-- ── SCRIPTS ─────────────────────────────────────────────────────────────── -->
 <script>
-const API_BASE    = window.location.origin;
-const WS_PROTOCOL = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-const WS_URL      = `${WS_PROTOCOL}//${window.location.host}/ws/live-feed`;
+// ── Backend API & WebSocket Configuration (Local vs Render vs Vercel) ───────
+// Override backend with ?api=https://your-service.onrender.com or localStorage
+const _urlParams = new URLSearchParams(window.location.search);
+if (_urlParams.get('api')) {
+  localStorage.setItem('CRICPOSE_API_URL', _urlParams.get('api').replace(/\/$/, ''));
+}
+const _isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+const _storedApi = localStorage.getItem('CRICPOSE_API_URL');
+// If on localhost default to window.location.origin; on Vercel default to stored API or Render backend
+const API_BASE = (_storedApi || (_isLocal ? window.location.origin : 'https://cricket-cover-drive-analysis.onrender.com')).replace(/\/$/, '');
+
+const WS_PROTOCOL = API_BASE.startsWith('https') ? 'wss:' : (API_BASE.startsWith('http:') ? 'ws:' : (window.location.protocol === 'https:' ? 'wss:' : 'ws:'));
+const WS_HOST     = API_BASE.replace(/^https?:\/\//, '');
+const WS_URL      = `${WS_PROTOCOL}//${WS_HOST}/ws/live-feed`;
+
+function promptBackendUrl() {
+  const current = localStorage.getItem('CRICPOSE_API_URL') || API_BASE;
+  const val = prompt('Enter your deployed Render backend URL:\n(e.g. https://cricket-cover-drive-analysis.onrender.com)', current);
+  if (val && val.trim()) {
+    localStorage.setItem('CRICPOSE_API_URL', val.trim().replace(/\/$/, ''));
+    alert(`Render Backend URL saved:\n${val.trim()}\n\nReloading application...`);
+    window.location.reload();
+  }
+}
+
+async function checkBackendHealth() {
+  const dot = document.getElementById('backendDot');
+  const label = document.getElementById('backendLabel');
+  if (!dot || !label) return;
+  try {
+    const res = await fetch(`${API_BASE}/health`, { signal: AbortSignal.timeout(5000) });
+    if (res.ok) {
+      dot.style.background = '#22E58B';
+      dot.style.boxShadow = '0 0 8px #22E58B';
+      label.textContent = 'Render API Online';
+    } else {
+      dot.style.background = '#f59e0b';
+      label.textContent = `API Status ${res.status}`;
+    }
+  } catch(e) {
+    dot.style.background = '#ef4444';
+    dot.style.boxShadow = '0 0 8px #ef4444';
+    label.textContent = 'API Connecting...';
+  }
+}
 
 let currentUser     = null;
 let isBroadcasting  = false;
@@ -1561,6 +1604,7 @@ function handleLogout() {
 // 2. INIT
 // ────────────────────────────────────────────────────────────────────────────
 async function initApp() {
+  checkBackendHealth();
   await Promise.all([
     loadDashboardStats(),
     loadMatches(),
@@ -2449,6 +2493,7 @@ function escHtml(str) {
 // 13. PAGE INIT
 // ────────────────────────────────────────────────────────────────────────────
 window.addEventListener('DOMContentLoaded', () => {
+  checkBackendHealth();
   const savedUser = localStorage.getItem('cricpose_user');
   if (savedUser) {
     try { setUserSession(JSON.parse(savedUser)); } catch(e) { handleLogout(); }
