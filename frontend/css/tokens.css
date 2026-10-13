@@ -34,23 +34,24 @@
   --orange: #F97316;
 
   /* ── Deep Background & Surfaces ────────────────────────────────────────── */
-  --bg-base: #070A12;
-  --bg-base-radial: radial-gradient(circle at 50% 0%, #0d1424 0%, #070A12 100%);
-  --bg-surface: rgba(15, 20, 36, 0.72);
-  --bg-surface-elevated: rgba(20, 28, 48, 0.82);
-  --bg-card: rgba(18, 25, 44, 0.62);
-  --bg-card-hover: rgba(28, 38, 64, 0.72);
-  --bg-input: rgba(11, 15, 28, 0.65);
-  --bg-fallback: rgba(20, 24, 45, 0.85);
+  --bg-base: #070B19;
+  --bg-gradient: linear-gradient(135deg, #070B19 0%, #0A0F24 50%, #0D132D 100%);
+  --bg-base-radial: radial-gradient(circle at 18% 15%, #0f1838 0%, transparent 55%), radial-gradient(circle at 82% 80%, #15103a 0%, transparent 55%), linear-gradient(135deg, #070B19 0%, #0A0F24 50%, #0D132D 100%);
+  --bg-surface: rgba(15, 20, 36, 0.75);
+  --bg-surface-elevated: rgba(20, 28, 48, 0.85);
+  --bg-card: rgba(255, 255, 255, 0.08);
+  --bg-card-hover: rgba(255, 255, 255, 0.12);
+  --bg-input: rgba(9, 14, 28, 0.7);
+  --bg-fallback: rgba(15, 20, 36, 0.92);
 
   /* ── Glassmorphism Tokens ─────────────────────────────────────────────── */
   --glass-bg: rgba(255, 255, 255, 0.08);
   --glass-bg-subtle: rgba(255, 255, 255, 0.04);
-  --glass-bg-elevated: rgba(255, 255, 255, 0.12);
+  --glass-bg-elevated: rgba(255, 255, 255, 0.11);
   --glass-blur: blur(20px) saturate(140%);
   --glass-blur-sm: blur(12px) saturate(130%);
   --glass-border: 1px solid rgba(255, 255, 255, 0.18);
-  --glass-border-subtle: 1px solid rgba(255, 255, 255, 0.09);
+  --glass-border-subtle: 1px solid rgba(255, 255, 255, 0.10);
   --glass-border-active: 1px solid rgba(34, 229, 139, 0.45);
   --glass-radius: 20px;
 
@@ -78,10 +79,10 @@
   --text-dim: #64748B;
 
   /* ── Shadows & Glows ──────────────────────────────────────────────────── */
-  --shadow-glass: 0 20px 50px -10px rgba(0, 0, 0, 0.65), inset 0 1px 0 rgba(255, 255, 255, 0.18);
+  --shadow-glass: 0 20px 48px -12px rgba(0, 0, 0, 0.65), inset 0 1px 0 rgba(255, 255, 255, 0.18), 0 0 32px -8px rgba(34, 229, 139, 0.08);
   --shadow-glass-sm: 0 10px 30px -5px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.14);
   --shadow-glow-primary: 0 0 25px rgba(34, 229, 139, 0.45);
-  --shadow-glow-accent: 0 0 25px rgba(0, 240, 255, 0.4);
+  --shadow-glow-accent: 0 0 25px rgba(0, 229, 255, 0.4);
   --shadow-main: 0 16px 42px -8px rgba(0, 0, 0, 0.7);
 
   /* ── Layout ───────────────────────────────────────────────────────────── */
@@ -114,9 +115,9 @@
   background: var(--glass-bg-elevated);
   backdrop-filter: var(--glass-blur);
   -webkit-backdrop-filter: var(--glass-blur);
-  border: 1px solid rgba(255, 255, 255, 0.24);
+  border: 1px solid rgba(255, 255, 255, 0.22);
   border-radius: var(--radius-lg);
-  box-shadow: 0 24px 60px -8px rgba(0, 0, 0, 0.75), inset 0 1px 0 rgba(255, 255, 255, 0.25);
+  box-shadow: 0 24px 60px -8px rgba(0, 0, 0, 0.75), inset 0 1px 0 rgba(255, 255, 255, 0.22);
 }
 
 /* ── Browser Fallback where backdrop-filter is unsupported ──────────────── */
@@ -134,7 +135,7 @@
   }
 }
 
-/* ── Ambient Glowing Orbs System ────────────────────────────────────────── */
+/* ── Ambient Glowing Orbs System (Level 0 Elevation) ─────────────────────── */
 .ambient-orbs-container {
   position: fixed;
   inset: 0;
@@ -147,42 +148,70 @@
   position: absolute;
   border-radius: 50%;
   pointer-events: none;
-  opacity: 0.45;
-  filter: blur(100px);
   will-change: transform;
-  animation: orb-drift 22s ease-in-out infinite alternate;
 }
 
+/* Electric Green Orb: 45% Opacity */
 .orb-1 {
+  width: 560px;
+  height: 560px;
+  background: radial-gradient(circle, rgba(34, 229, 139, 0.45) 0%, rgba(34, 229, 139, 0.16) 45%, transparent 70%);
+  opacity: 0.45;
+  filter: blur(105px);
+  top: -100px;
+  left: 10%;
+  animation: orb-drift-1 24s ease-in-out infinite alternate;
+}
+
+/* Electric Cyan Orb: 42% Opacity */
+.orb-2 {
+  width: 600px;
+  height: 600px;
+  background: radial-gradient(circle, rgba(0, 229, 255, 0.42) 0%, rgba(0, 229, 255, 0.15) 45%, transparent 70%);
+  opacity: 0.42;
+  filter: blur(115px);
+  bottom: -60px;
+  right: -60px;
+  animation: orb-drift-2 28s ease-in-out infinite alternate;
+}
+
+/* Radiant Violet Orb: 40% Opacity */
+.orb-3 {
   width: 520px;
   height: 520px;
-  background: radial-gradient(circle, rgba(34, 229, 139, 0.38) 0%, rgba(34, 229, 139, 0) 70%);
-  top: -120px;
-  left: 12%;
+  background: radial-gradient(circle, rgba(139, 92, 246, 0.40) 0%, rgba(139, 92, 246, 0.14) 45%, transparent 70%);
+  opacity: 0.40;
+  filter: blur(110px);
+  top: 38%;
+  left: 50%;
+  animation: orb-drift-3 22s ease-in-out infinite alternate;
 }
 
-.orb-2 {
-  width: 580px;
-  height: 580px;
-  background: radial-gradient(circle, rgba(0, 240, 255, 0.28) 0%, rgba(0, 240, 255, 0) 70%);
-  bottom: 0%;
-  right: -100px;
-  animation-delay: -7s;
-  animation-duration: 26s;
-}
-
-.orb-3 {
-  width: 440px;
-  height: 440px;
-  background: radial-gradient(circle, rgba(139, 92, 246, 0.22) 0%, rgba(139, 92, 246, 0) 70%);
-  top: 45%;
-  left: 55%;
-  animation-delay: -14s;
-  animation-duration: 20s;
-}
-
-@keyframes orb-drift {
+@keyframes orb-drift-1 {
   0% { transform: translate3d(0, 0, 0) scale(1); }
-  50% { transform: translate3d(35px, 45px, 0) scale(1.08); }
+  50% { transform: translate3d(40px, 35px, 0) scale(1.08); }
   100% { transform: translate3d(-30px, 20px, 0) scale(0.94); }
+}
+
+@keyframes orb-drift-2 {
+  0% { transform: translate3d(0, 0, 0) scale(1); }
+  50% { transform: translate3d(-35px, -40px, 0) scale(1.06); }
+  100% { transform: translate3d(25px, -20px, 0) scale(0.96); }
+}
+
+@keyframes orb-drift-3 {
+  0% { transform: translate3d(0, 0, 0) scale(1); }
+  50% { transform: translate3d(30px, -30px, 0) scale(1.05); }
+  100% { transform: translate3d(-35px, 25px, 0) scale(0.95); }
+}
+
+/* ── Accessibility: Prefers-Reduced-Motion Respected ─────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  .orb,
+  .auth-orb,
+  .shot-pulse,
+  .pulse-dot {
+    animation: none !important;
+    transition: none !important;
+  }
 }

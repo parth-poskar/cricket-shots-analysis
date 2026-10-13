@@ -7,23 +7,19 @@
   <meta name="description" content="Real-time cricket shot detection, classification and biomechanical analytics dashboard for coaches, analysts, broadcasters and players.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/static/css/tokens.css">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/tokens.css">
   <style>
-    @import url('/static/css/tokens.css');
-    @import url('css/tokens.css');
-
     :root {
-      --bg-base: #070A12;
-      --bg-surface: rgba(15, 20, 36, 0.72);
-      --bg-card: rgba(255, 255, 255, 0.07);
+      --bg-base: #070B19;
+      --bg-surface: rgba(15, 20, 36, 0.75);
+      --bg-card: rgba(255, 255, 255, 0.08);
       --bg-card-hover: rgba(255, 255, 255, 0.12);
-      --border-color: rgba(255, 255, 255, 0.14);
+      --border-color: rgba(255, 255, 255, 0.18);
       --border-focus: rgba(34, 229, 139, 0.5);
       --primary: #22E58B;
       --primary-glow: rgba(34, 229, 139, 0.4);
-      --accent: #00F0FF;
+      --accent: #00E5FF;
       --gold: #f59e0b;
       --red: #ef4444;
       --purple: #8b5cf6;
@@ -38,11 +34,11 @@
     }
     * { margin:0; padding:0; box-sizing:border-box; font-family:'Outfit',sans-serif; }
     body {
-      background-color: var(--bg-base);
+      background-color: #070B19;
       background-image:
-        radial-gradient(at 15% 10%, rgba(34, 229, 139, 0.12) 0px, transparent 45%),
-        radial-gradient(at 85% 15%, rgba(0, 240, 255, 0.10) 0px, transparent 45%),
-        radial-gradient(at 50% 90%, rgba(139, 92, 246, 0.08) 0px, transparent 50%);
+        radial-gradient(circle at 18% 15%, rgba(15, 24, 56, 0.85) 0%, transparent 55%),
+        radial-gradient(circle at 82% 80%, rgba(21, 16, 58, 0.85) 0%, transparent 55%),
+        linear-gradient(135deg, #070B19 0%, #0A0F24 50%, #0D132D 100%);
       color: var(--text-main);
       min-height: 100vh;
       display: flex;
@@ -65,20 +61,23 @@
       -webkit-backdrop-filter: blur(20px) saturate(140%);
       border: 1px solid rgba(255, 255, 255, 0.18);
       border-radius: 20px;
+      box-shadow: 0 20px 48px -12px rgba(0, 0, 0, 0.65), inset 0 1px 0 rgba(255, 255, 255, 0.18);
     }
     @supports not (backdrop-filter: blur(20px)) {
       .glass,
       .auth-box,
+      .auth-card-panel,
+      .auth-hero-panel,
       .card,
       .stat-card,
       .sidebar,
       .topbar,
       .modal-box {
-        background: rgba(20, 24, 45, 0.85) !important;
+        background: rgba(15, 20, 36, 0.92) !important;
       }
     }
 
-    /* ── Ambient Glowing Orbs ─────────────────────────────────────────── */
+    /* ── Ambient Glowing Orbs Background (Level 0 Elevation) ──────────── */
     .ambient-orbs-container {
       position: fixed; inset: 0;
       overflow: hidden; pointer-events: none;
@@ -86,106 +85,218 @@
     }
     .orb {
       position: absolute; border-radius: 50%;
-      pointer-events: none; opacity: 0.45;
-      filter: blur(95px);
-      animation: orb-drift 20s ease-in-out infinite alternate;
+      pointer-events: none; will-change: transform;
     }
     .orb-1 {
-      width: 500px; height: 500px;
-      background: radial-gradient(circle, rgba(34, 229, 139, 0.35) 0%, rgba(34, 229, 139, 0) 70%);
-      top: -100px; left: 15%;
+      width: 560px; height: 560px;
+      background: radial-gradient(circle, rgba(34, 229, 139, 0.45) 0%, rgba(34, 229, 139, 0.16) 45%, transparent 70%);
+      opacity: 0.45; filter: blur(105px);
+      top: -100px; left: 10%;
+      animation: orb-drift-1 24s ease-in-out infinite alternate;
     }
     .orb-2 {
-      width: 550px; height: 550px;
-      background: radial-gradient(circle, rgba(0, 240, 255, 0.28) 0%, rgba(0, 240, 255, 0) 70%);
-      bottom: 2%; right: -80px;
-      animation-delay: -7s;
+      width: 600px; height: 600px;
+      background: radial-gradient(circle, rgba(0, 229, 255, 0.42) 0%, rgba(0, 229, 255, 0.15) 45%, transparent 70%);
+      opacity: 0.42; filter: blur(115px);
+      bottom: -60px; right: -60px;
+      animation: orb-drift-2 28s ease-in-out infinite alternate;
     }
     .orb-3 {
-      width: 420px; height: 420px;
-      background: radial-gradient(circle, rgba(139, 92, 246, 0.22) 0%, rgba(139, 92, 246, 0) 70%);
-      top: 45%; left: 50%;
-      animation-delay: -13s;
+      width: 520px; height: 520px;
+      background: radial-gradient(circle, rgba(139, 92, 246, 0.40) 0%, rgba(139, 92, 246, 0.14) 45%, transparent 70%);
+      opacity: 0.40; filter: blur(110px);
+      top: 38%; left: 50%;
+      animation: orb-drift-3 22s ease-in-out infinite alternate;
     }
-    @keyframes orb-drift {
+    @keyframes orb-drift-1 {
       0% { transform: translate3d(0, 0, 0) scale(1); }
-      50% { transform: translate3d(30px, 40px, 0) scale(1.06); }
-      100% { transform: translate3d(-25px, 20px, 0) scale(0.95); }
+      50% { transform: translate3d(40px, 35px, 0) scale(1.08); }
+      100% { transform: translate3d(-30px, 20px, 0) scale(0.94); }
+    }
+    @keyframes orb-drift-2 {
+      0% { transform: translate3d(0, 0, 0) scale(1); }
+      50% { transform: translate3d(-35px, -40px, 0) scale(1.06); }
+      100% { transform: translate3d(25px, -20px, 0) scale(0.96); }
+    }
+    @keyframes orb-drift-3 {
+      0% { transform: translate3d(0, 0, 0) scale(1); }
+      50% { transform: translate3d(30px, -30px, 0) scale(1.05); }
+      100% { transform: translate3d(-35px, 25px, 0) scale(0.95); }
     }
 
-    /* ── Auth / Login Overlay ─────────────────────────────────────────── */
+    /* ── Auth / Login Split Layout ────────────────────────────────────── */
     #authOverlay {
       position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-      background: rgba(5, 8, 16, 0.78);
+      background: radial-gradient(circle at 18% 15%, rgba(15, 24, 56, 0.88) 0%, transparent 60%),
+                  radial-gradient(circle at 82% 80%, rgba(21, 16, 58, 0.88) 0%, transparent 60%),
+                  linear-gradient(135deg, rgba(7, 11, 25, 0.94) 0%, rgba(10, 15, 36, 0.94) 50%, rgba(13, 19, 45, 0.94) 100%);
       backdrop-filter: blur(28px) saturate(140%);
       -webkit-backdrop-filter: blur(28px) saturate(140%);
       display: flex; align-items: center; justify-content: center;
       z-index: 9999; padding: 1.5rem;
+      overflow-y: auto;
     }
     .auth-orb {
-      position: absolute; width: 440px; height: 440px;
-      background: radial-gradient(circle, rgba(34, 229, 139, 0.35) 0%, rgba(0, 240, 255, 0.15) 45%, transparent 70%);
-      filter: blur(60px); pointer-events: none; z-index: 1;
-      animation: pulse-auth-orb 8s ease-in-out infinite alternate;
+      position: absolute; width: 500px; height: 500px;
+      background: radial-gradient(circle, rgba(34, 229, 139, 0.38) 0%, rgba(0, 229, 255, 0.18) 45%, transparent 70%);
+      filter: blur(80px); pointer-events: none; z-index: 1;
+      animation: pulse-auth-orb 10s ease-in-out infinite alternate;
     }
     @keyframes pulse-auth-orb {
-      0% { transform: scale(0.95) translate(-10px, -10px); opacity: 0.7; }
-      100% { transform: scale(1.1) translate(10px, 10px); opacity: 0.95; }
+      0% { transform: scale(0.95) translate(-15px, -10px); opacity: 0.7; }
+      100% { transform: scale(1.08) translate(15px, 15px); opacity: 0.95; }
     }
-    .auth-box {
+    .auth-split-wrapper {
+      display: grid;
+      grid-template-columns: minmax(360px, 440px) minmax(460px, 580px);
+      gap: 2rem;
+      align-items: stretch;
+      width: 100%;
+      max-width: 1060px;
+      position: relative;
+      z-index: 2;
+      margin: auto;
+    }
+    @media (max-width: 960px) {
+      .auth-split-wrapper {
+        grid-template-columns: 1fr;
+        max-width: 480px;
+        gap: 1.5rem;
+      }
+    }
+
+    /* Left: Glass Login Card */
+    .auth-card-panel {
       background: rgba(20, 24, 45, 0.85); /* Solid translucent fallback */
       background: rgba(255, 255, 255, 0.08);
       backdrop-filter: blur(20px) saturate(140%);
       -webkit-backdrop-filter: blur(20px) saturate(140%);
       border: 1px solid rgba(255, 255, 255, 0.18);
       border-radius: 20px;
-      width: 100%; max-width: 460px;
-      padding: 2.5rem;
-      box-shadow: 0 25px 60px rgba(0, 0, 0, 0.75), inset 0 1px 0 rgba(255, 255, 255, 0.2);
-      position: relative; z-index: 2;
+      width: 100%;
+      padding: 2.2rem;
+      box-shadow: 0 24px 60px -12px rgba(0, 0, 0, 0.65), inset 0 1px 0 rgba(255, 255, 255, 0.20), 0 0 35px -8px rgba(34, 229, 139, 0.08);
+      display: flex; flex-direction: column; justify-content: space-between;
+      position: relative;
     }
-    .auth-brand { text-align: center; margin-bottom: 1.85rem; }
-    .auth-brand-icon {
-      width: 58px; height: 58px;
-      background: linear-gradient(135deg, var(--primary), var(--accent));
-      border-radius: 16px; display: inline-flex; align-items: center;
-      justify-content: center; font-size: 1.9rem;
-      box-shadow: 0 0 32px var(--primary-glow); margin-bottom: 0.85rem;
-      border: 1px solid rgba(255, 255, 255, 0.25);
+    .auth-telemetry-header {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 1.35rem; padding-bottom: .85rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.10);
     }
-    .auth-brand h2 {
-      font-size: 1.8rem; font-weight: 800; letter-spacing: -0.5px;
-      background: linear-gradient(135deg, #ffffff 40%, var(--primary) 100%);
-      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    .auth-status-chip {
+      display: inline-flex; align-items: center; gap: .45rem;
+      padding: .25rem .7rem; border-radius: 20px;
+      background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.12);
     }
+    .auth-status-dot {
+      width: 6px; height: 6px; border-radius: 50%;
+      background: #22E58B; box-shadow: 0 0 8px #22E58B;
+      animation: pulse-dot 1.5s infinite;
+    }
+    .auth-status-text {
+      font-size: .68rem; font-weight: 700; color: #cbd5e1;
+      letter-spacing: .08em; text-transform: uppercase;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+    }
+    .auth-online-indicator {
+      display: inline-flex; align-items: center; gap: .35rem;
+      font-size: .72rem; font-weight: 600; color: #94a3b8;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .auth-brand { text-align: center; margin-bottom: 1.45rem; }
+    .auth-brand-emblem {
+      position: relative; display: inline-flex; align-items: center; justify-content: center;
+      margin-bottom: .75rem;
+    }
+    .auth-brand-icon-box {
+      width: 54px; height: 54px; border-radius: 14px;
+      background: linear-gradient(135deg, rgba(34, 229, 139, 0.2), rgba(0, 229, 255, 0.1));
+      border: 1px solid rgba(255, 255, 255, 0.22);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.7rem; box-shadow: 0 0 28px rgba(34, 229, 139, 0.35);
+    }
+    .auth-orbit-dot {
+      position: absolute; top: -3px; right: -3px; width: 10px; height: 10px;
+      border-radius: 50%; background: #22E58B;
+      border: 2px solid #070B19; box-shadow: 0 0 10px #22E58B;
+    }
+    .auth-title {
+      font-size: 1.85rem; font-weight: 800; letter-spacing: -0.03em;
+      color: #ffffff; line-height: 1.1; margin-bottom: .25rem;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+    }
+    .auth-title-accent { color: #22E58B; }
+    .auth-subtitle {
+      font-size: .84rem; color: #94a3b8; font-weight: 400;
+    }
+
     .auth-tabs {
-      display: flex; gap: .4rem; background: rgba(0, 0, 0, 0.35); padding: .35rem;
-      border-radius: 12px; margin-bottom: 1.5rem;
+      display: flex; gap: .4rem; background: rgba(0, 0, 0, 0.35); padding: .3rem;
+      border-radius: 12px; margin-bottom: 1.25rem;
       border: 1px solid rgba(255, 255, 255, 0.1);
     }
     .auth-tab-btn {
       flex: 1; background: transparent; border: none; color: var(--text-muted);
-      padding: .55rem; border-radius: var(--radius-sm); font-weight: 600;
-      font-size: .88rem; cursor: pointer; transition: all .25s ease;
+      padding: .5rem; border-radius: var(--radius-sm); font-weight: 600;
+      font-size: .86rem; cursor: pointer; transition: all .25s ease;
+      font-family: 'Plus Jakarta Sans', sans-serif;
     }
     .auth-tab-btn.active {
       background: rgba(34, 229, 139, 0.16); color: #fff;
       border: 1px solid rgba(34, 229, 139, 0.45);
       box-shadow: 0 0 16px rgba(34, 229, 139, 0.22);
     }
+    .auth-error-banner {
+      background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.4);
+      color: #fca5a5; padding: .6rem; border-radius: var(--radius-sm);
+      font-size: .82rem; margin-bottom: 1rem;
+    }
+
     .form-group { margin-bottom: 1.15rem; }
-    .form-label { display: block; font-size: .82rem; color: var(--text-muted); margin-bottom: .4rem; font-weight: 500; }
+    .form-label { display: block; font-size: .76rem; color: #94a3b8; margin-bottom: .4rem; font-weight: 600; text-transform: uppercase; letter-spacing: .06em; font-family: 'Plus Jakarta Sans', sans-serif; }
+    .input-with-icon {
+      position: relative; display: flex; align-items: center; width: 100%;
+    }
+    .input-icon {
+      position: absolute; left: 12px; pointer-events: none;
+      font-size: .95rem; opacity: .7;
+    }
     .form-input {
-      width: 100%; background: rgba(0, 0, 0, 0.4);
+      width: 100%; background: rgba(9, 14, 28, 0.7);
       border: 1px solid rgba(255, 255, 255, 0.14);
       color: #fff; padding: .68rem .95rem; border-radius: var(--radius-sm);
       font-size: .9rem; outline: none; transition: all .2s ease; font-family: inherit;
     }
+    .input-with-icon .form-input {
+      padding-left: 2.35rem; padding-right: 2.35rem;
+    }
     .form-input:focus {
       border-color: var(--primary);
       box-shadow: 0 0 0 3px rgba(34, 229, 139, 0.2), 0 0 16px rgba(34, 229, 139, 0.25);
-      background: rgba(0, 0, 0, 0.55);
+      background: rgba(9, 14, 28, 0.85);
     }
+    .btn-toggle-pwd {
+      position: absolute; right: 10px; background: none; border: none;
+      cursor: pointer; font-size: 1rem; opacity: .7; transition: opacity .2s;
+    }
+    .btn-toggle-pwd:hover { opacity: 1; }
+
+    .auth-extra-row {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-top: .4rem; margin-bottom: 1.15rem; font-size: .8rem;
+    }
+    .auth-remember-label {
+      display: flex; align-items: center; gap: .45rem;
+      color: var(--text-muted); cursor: pointer; user-select: none;
+    }
+    .auth-checkbox { accent-color: #22E58B; cursor: pointer; }
+    .auth-forgot-link {
+      color: #22E58B; text-decoration: none; font-weight: 500;
+    }
+    .auth-forgot-link:hover { text-decoration: underline; color: #73ffad; }
+
     .btn {
       background: linear-gradient(135deg, var(--primary), #10b981);
       color: #05140b; border: none;
@@ -199,6 +310,21 @@
       box-shadow: 0 6px 26px rgba(34, 229, 139, 0.6);
       background: linear-gradient(135deg, #2cf095, #17c88b);
     }
+    .auth-submit-btn {
+      width: 100%; border-radius: 9999px;
+      background: #22E58B; color: #070B19; font-weight: 700;
+      padding: .75rem 1.5rem; font-size: .92rem;
+      box-shadow: 0 0 20px rgba(34, 229, 139, 0.4);
+      display: inline-flex; align-items: center; justify-content: center; gap: .5rem;
+      cursor: pointer; transition: all .2s ease;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+    }
+    .auth-submit-btn:hover {
+      background: #39ec9b; box-shadow: 0 0 28px rgba(34, 229, 139, 0.65);
+      transform: translateY(-2px);
+    }
+    .btn-arrow { font-size: 1.05rem; }
+
     .btn-secondary {
       background: rgba(255, 255, 255, 0.08); color: #fff;
       border: 1px solid rgba(255, 255, 255, 0.16); box-shadow: none;
@@ -209,17 +335,145 @@
       box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
       color: #fff;
     }
+    .auth-divider {
+      position: relative; margin: 1.35rem 0 1rem 0; text-align: center;
+    }
+    .auth-divider::before {
+      content: ''; position: absolute; top: 50%; left: 0; right: 0;
+      height: 1px; background: rgba(255, 255, 255, 0.12);
+    }
+    .auth-divider span {
+      position: relative; background: rgba(15, 20, 36, 0.95);
+      padding: 0 .75rem; font-size: .7rem; text-transform: uppercase;
+      letter-spacing: .08em; color: #94a3b8; font-weight: 600;
+      border-radius: 10px; border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .auth-demo-btn {
+      width: 100%; border-radius: 9999px;
+      background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.18);
+      color: #fff; font-weight: 600; padding: .65rem 1.25rem; font-size: .88rem;
+      display: inline-flex; align-items: center; justify-content: center; gap: .5rem;
+      cursor: pointer; transition: all .2s ease;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+    }
+    .auth-demo-btn:hover {
+      background: rgba(255, 255, 255, 0.14); border-color: rgba(34, 229, 139, 0.5);
+      box-shadow: 0 0 20px rgba(34, 229, 139, 0.2);
+    }
+    .auth-demo-icon { font-size: 1rem; color: #22E58B; }
+
+    .auth-footer-badge {
+      display: flex; align-items: center; justify-content: center; gap: .45rem;
+      margin-top: 1.35rem; padding-top: .85rem; border-top: 1px solid rgba(255, 255, 255, 0.08);
+      font-size: .72rem; color: #94a3b8; text-align: center;
+    }
+    .auth-ping-dot {
+      width: 6px; height: 6px; border-radius: 50%;
+      background: #22E58B; box-shadow: 0 0 6px #22E58B;
+    }
+    .auth-reg-grid {
+      display: grid; grid-template-columns: 1fr 1fr; gap: .75rem;
+    }
+
+    /* Right: Hero Panel with Cricket Field SVG & Tagline */
+    .auth-hero-panel {
+      background: rgba(20, 24, 45, 0.85); /* Solid translucent fallback */
+      background: rgba(255, 255, 255, 0.06);
+      backdrop-filter: blur(20px) saturate(140%);
+      -webkit-backdrop-filter: blur(20px) saturate(140%);
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      border-radius: 20px;
+      padding: 2.2rem 2rem;
+      display: flex; flex-direction: column; justify-content: space-between;
+      box-shadow: 0 24px 60px -12px rgba(0, 0, 0, 0.65), inset 0 1px 0 rgba(255, 255, 255, 0.18), 0 0 35px -10px rgba(34, 229, 139, 0.12);
+      position: relative; overflow: hidden;
+    }
+    .auth-hero-panel::before {
+      content: ''; position: absolute; inset: 0;
+      background: radial-gradient(circle at 75% 25%, rgba(34, 229, 139, 0.12) 0%, transparent 60%),
+                  radial-gradient(circle at 25% 75%, rgba(0, 229, 255, 0.08) 0%, transparent 60%);
+      pointer-events: none;
+    }
+
+    .hero-field-wrapper {
+      width: 100%; display: flex; align-items: center; justify-content: center;
+      position: relative; z-index: 1; margin-bottom: 1.25rem;
+    }
+    .cricket-field-svg {
+      width: 100%; height: auto; max-height: 290px;
+      filter: drop-shadow(0 14px 32px rgba(0, 0, 0, 0.65));
+    }
+    .shot-trail-active {
+      stroke-dasharray: 400;
+      stroke-dashoffset: 400;
+      animation: draw-shot-trail 3.2s ease-in-out infinite;
+    }
+    @keyframes draw-shot-trail {
+      0% { stroke-dashoffset: 400; opacity: 0; }
+      15% { opacity: 1; }
+      75% { stroke-dashoffset: 0; opacity: 1; }
+      95%, 100% { stroke-dashoffset: 0; opacity: 0.9; }
+    }
+    .shot-pulse {
+      animation: shot-pulse-anim 2s ease-in-out infinite;
+    }
+    @keyframes shot-pulse-anim {
+      0%, 100% { r: 8px; opacity: 1; }
+      50% { r: 12px; opacity: 0.6; }
+    }
+
+    .auth-hero-copy {
+      position: relative; z-index: 1; text-align: left;
+    }
+    .hero-badge-pill {
+      display: inline-flex; align-items: center; gap: .45rem;
+      padding: .28rem .75rem; border-radius: 9999px;
+      background: rgba(34, 229, 139, 0.12); border: 1px solid rgba(34, 229, 139, 0.35);
+      font-size: .72rem; font-weight: 700; color: #22E58B;
+      text-transform: uppercase; letter-spacing: .08em;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      margin-bottom: .65rem;
+    }
+    .hero-badge-dot {
+      width: 6px; height: 6px; border-radius: 50%;
+      background: #22E58B; box-shadow: 0 0 6px #22E58B;
+    }
+    .auth-hero-tagline {
+      font-size: 1.85rem; font-weight: 800; line-height: 1.22;
+      letter-spacing: -0.025em; color: #ffffff;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      margin-bottom: .6rem;
+    }
+    .auth-hero-desc {
+      font-size: .88rem; color: #cbd5e1; line-height: 1.5;
+      font-family: 'Inter', sans-serif; margin-bottom: 1.25rem;
+    }
+    .auth-hero-features {
+      display: flex; flex-wrap: wrap; gap: .55rem;
+    }
+    .feature-chip {
+      display: inline-flex; align-items: center; gap: .4rem;
+      padding: .35rem .75rem; border-radius: 9999px;
+      background: rgba(255, 255, 255, 0.06); border: 1px solid rgba(255, 255, 255, 0.14);
+      font-size: .76rem; font-weight: 600; color: #dfe1f6;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+    }
+    .feature-chip-icon { font-size: .85rem; }
+
     .btn-danger { background: linear-gradient(135deg, var(--red), #b91c1c); color: #fff; box-shadow: 0 4px 16px rgba(239, 68, 68, 0.35); }
     .btn-sm { padding: .42rem .95rem; font-size: .82rem; width: auto; border-radius: 8px; }
     .btn-accent { background: linear-gradient(135deg, var(--accent), #0891b2); color: #04121a; box-shadow: 0 4px 16px rgba(0, 240, 255, 0.35); }
 
-    /* ── Sidebar ──────────────────────────────────────────────────────── */
+    /* ── Sidebar (Glass Panel) ────────────────────────────────────────── */
     .sidebar {
       width: var(--sidebar-width);
-      background: rgba(12, 17, 30, 0.65);
-      backdrop-filter: blur(24px) saturate(140%);
-      -webkit-backdrop-filter: blur(24px) saturate(140%);
-      border-right: 1px solid rgba(255, 255, 255, 0.12);
+      background: rgba(20, 24, 45, 0.85); /* fallback */
+      background: rgba(255, 255, 255, 0.08);
+      backdrop-filter: blur(20px) saturate(140%);
+      -webkit-backdrop-filter: blur(20px) saturate(140%);
+      border-right: 1px solid rgba(255, 255, 255, 0.18);
+      box-shadow: 4px 0 24px rgba(0, 0, 0, 0.4);
       display: flex; flex-direction: column; padding: 1.6rem 1.15rem; flex-shrink: 0;
       position: relative; z-index: 10;
     }
@@ -256,13 +510,13 @@
       font-weight: 700; padding: .1rem .45rem; border-radius: 20px; min-width: 18px; text-align: center;
     }
     .user-profile-card {
-      background: rgba(255, 255, 255, 0.06);
-      backdrop-filter: blur(14px);
-      -webkit-backdrop-filter: blur(14px);
-      border: 1px solid rgba(255, 255, 255, 0.14);
-      border-radius: 14px; padding: .85rem;
+      background: rgba(255, 255, 255, 0.08);
+      backdrop-filter: blur(20px) saturate(140%);
+      -webkit-backdrop-filter: blur(20px) saturate(140%);
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      border-radius: 16px; padding: .85rem;
       display: flex; align-items: center; justify-content: space-between; margin-top: auto;
-      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
     }
     .user-info { display: flex; align-items: center; gap: .65rem; overflow: hidden; }
     .user-avatar {
@@ -273,29 +527,33 @@
       border: 1px solid rgba(255, 255, 255, 0.25);
     }
 
-    /* ── Main Layout ──────────────────────────────────────────────────── */
+    /* ── Main Layout & Topbar (Glass Panel) ───────────────────────────── */
     .main-viewport { flex: 1; display: flex; flex-direction: column; overflow-y: auto; height: 100vh; position: relative; z-index: 5; }
     .topbar {
       display: flex; justify-content: space-between; align-items: center;
-      padding: 1.1rem 2.2rem; background: rgba(12, 17, 30, 0.6);
+      padding: 1.1rem 2.2rem;
+      background: rgba(20, 24, 45, 0.85); /* fallback */
+      background: rgba(255, 255, 255, 0.08);
       backdrop-filter: blur(20px) saturate(140%);
       -webkit-backdrop-filter: blur(20px) saturate(140%);
-      border-bottom: 1px solid rgba(255, 255, 255, 0.1); position: sticky; top: 0; z-index: 50;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.18);
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35);
+      position: sticky; top: 0; z-index: 50;
     }
     .view-container { padding: 1.85rem 2.2rem; flex: 1; max-width: 1440px; width: 100%; margin: 0 auto; }
 
-    /* ── Stats Grid ────────────────────────────────────────────────────── */
+    /* ── Stats Grid & Glass Stat Cards ────────────────────────────────── */
     .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1.35rem; margin-bottom: 1.85rem; }
     .stat-card {
       background: rgba(20, 24, 45, 0.85); /* Solid translucent fallback */
-      background: rgba(255, 255, 255, 0.07);
+      background: rgba(255, 255, 255, 0.08);
       backdrop-filter: blur(20px) saturate(140%);
       -webkit-backdrop-filter: blur(20px) saturate(140%);
-      border: 1px solid rgba(255, 255, 255, 0.16);
-      border-radius: 16px; padding: 1.35rem;
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      border-radius: 20px; padding: 1.35rem;
       display: flex; flex-direction: column; justify-content: space-between;
       transition: border-color .25s ease, transform .25s ease, box-shadow .25s ease;
-      box-shadow: 0 12px 32px -6px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.14);
+      box-shadow: 0 16px 42px -8px rgba(0, 0, 0, 0.65), inset 0 1px 0 rgba(255, 255, 255, 0.18);
       position: relative; overflow: hidden;
     }
     .stat-card::before {
@@ -311,15 +569,15 @@
     .stat-val { font-size: 1.95rem; font-weight: 800; font-family: 'JetBrains Mono', monospace; color: #fff; margin: .35rem 0; text-shadow: 0 2px 10px rgba(0,0,0,0.5); }
     .stat-sub { font-size: .78rem; color: var(--primary); display: flex; align-items: center; gap: .3rem; }
 
-    /* ── Cards ─────────────────────────────────────────────────────────── */
+    /* ── Dashboard Glass Cards ────────────────────────────────────────── */
     .card {
       background: rgba(20, 24, 45, 0.85); /* Solid translucent fallback */
-      background: rgba(255, 255, 255, 0.07);
+      background: rgba(255, 255, 255, 0.08);
       backdrop-filter: blur(20px) saturate(140%);
       -webkit-backdrop-filter: blur(20px) saturate(140%);
-      border: 1px solid rgba(255, 255, 255, 0.16);
+      border: 1px solid rgba(255, 255, 255, 0.18);
       border-radius: 20px; padding: 1.6rem;
-      box-shadow: 0 18px 45px -8px rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.16);
+      box-shadow: 0 20px 48px -12px rgba(0, 0, 0, 0.65), inset 0 1px 0 rgba(255, 255, 255, 0.18), 0 0 32px -8px rgba(34, 229, 139, 0.06);
       margin-bottom: 1.6rem;
     }
     .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.35rem; flex-wrap: wrap; gap: .75rem; }
@@ -470,40 +728,304 @@
   <div class="orb orb-3"></div>
 </div>
 
-<!-- ── AUTH OVERLAY ────────────────────────────────────────────────────────── -->
+<!-- ── AUTH OVERLAY (Split Layout: Glass Card + Cricket Field Hero) ────────── -->
 <div id="authOverlay">
-  <!-- Glowing orb behind auth card -->
+  <!-- Glowing drifting ambient orb behind auth overlay -->
   <div class="auth-orb" aria-hidden="true"></div>
-  <div class="auth-box glass">
-    <div class="auth-brand">
-      <div class="auth-brand-icon">🏏</div>
-      <h2>CricPose AI</h2>
-      <p style="color:var(--text-muted);font-size:.85rem;margin-top:.25rem;">Cricket Live Shot Analysis Platform</p>
-    </div>
-    <div class="auth-tabs">
-      <button class="auth-tab-btn active" id="tabSignIn" onclick="toggleAuthTab('login')">Sign In</button>
-      <button class="auth-tab-btn" id="tabSignUp" onclick="toggleAuthTab('register')">Create Account</button>
-    </div>
-    <div id="authErrorMsg" style="display:none;background:rgba(239,68,68,.15);border:1px solid rgba(239,68,68,.4);color:#fca5a5;padding:.6rem;border-radius:var(--radius-sm);font-size:.82rem;margin-bottom:1rem;"></div>
-    <form id="formLogin" onsubmit="handleLogin(event)">
-      <div class="form-group"><label class="form-label">Username or Email</label><input type="text" id="loginUsername" class="form-input" placeholder="e.g. demo" required value="demo"></div>
-      <div class="form-group"><label class="form-label">Password</label><input type="password" id="loginPassword" class="form-input" placeholder="••••••••" required value="demo123"></div>
-      <button type="submit" class="btn" style="margin-top:.5rem;"><span>🔓</span> Sign In to Dashboard</button>
-    </form>
-    <form id="formRegister" onsubmit="handleRegister(event)" style="display:none;">
-      <div class="form-group"><label class="form-label">Full Name</label><input type="text" id="regFullName" class="form-input" placeholder="Virat Kohli" required></div>
-      <div class="form-group"><label class="form-label">Username</label><input type="text" id="regUsername" class="form-input" placeholder="vkohli18" required></div>
-      <div class="form-group"><label class="form-label">Email</label><input type="email" id="regEmail" class="form-input" placeholder="vkohli@india.cricket" required></div>
-      <div class="form-group"><label class="form-label">Password</label><input type="password" id="regPassword" class="form-input" placeholder="••••••••" required></div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:.75rem;">
-        <div class="form-group"><label class="form-label">Batting Hand</label><select id="regHandedness" class="form-input"><option value="Right-Handed">Right-Handed</option><option value="Left-Handed">Left-Handed</option></select></div>
-        <div class="form-group"><label class="form-label">Batting Order</label><select id="regStyle" class="form-input"><option value="Top Order">Top Order</option><option value="Middle Order">Middle Order</option><option value="Finisher">Finisher</option></select></div>
+
+  <div class="auth-split-wrapper">
+    <!-- LEFT: Glass Login Card -->
+    <section class="auth-card-panel glass">
+      <!-- Top Subtle Telemetry Status Pill -->
+      <div class="auth-telemetry-header">
+        <div class="auth-status-chip">
+          <span class="auth-status-dot"></span>
+          <span class="auth-status-text">Enterprise Telemetry v2.4</span>
+        </div>
+        <div class="auth-online-indicator">
+          <span style="color:#22E58B;font-size:.85rem;">●</span>
+          <span>ONLINE</span>
+        </div>
       </div>
-      <button type="submit" class="btn" style="margin-top:.5rem;"><span>✨</span> Create Account</button>
-    </form>
-    <div style="margin-top:1.25rem;text-align:center;border-top:1px solid rgba(255,255,255,0.12);padding-top:1rem;">
-      <button type="button" class="btn btn-secondary" onclick="loginDemoUser()"><span>⚡</span> Instant Demo Guest Access</button>
-    </div>
+
+      <!-- Header & Branding -->
+      <div class="auth-brand">
+        <div class="auth-brand-emblem">
+          <div class="auth-brand-icon-box">
+            <span>🏏</span>
+          </div>
+          <span class="auth-orbit-dot"></span>
+        </div>
+        <h1 class="auth-title">
+          ShotSense<span class="auth-title-accent">.</span>
+        </h1>
+        <p class="auth-subtitle">Cricket Shot Analytics System</p>
+      </div>
+
+      <!-- Auth Tabs: Sign In / Create Account -->
+      <div class="auth-tabs">
+        <button class="auth-tab-btn active" id="tabSignIn" onclick="toggleAuthTab('login')">Sign In</button>
+        <button class="auth-tab-btn" id="tabSignUp" onclick="toggleAuthTab('register')">Create Account</button>
+      </div>
+
+      <!-- Error message container -->
+      <div id="authErrorMsg" style="display:none;" class="auth-error-banner"></div>
+
+      <!-- Form 1: Sign In -->
+      <form id="formLogin" onsubmit="handleLogin(event)">
+        <div class="form-group">
+          <label class="form-label" for="loginUsername">Username or Email</label>
+          <div class="input-with-icon">
+            <span class="input-icon">👤</span>
+            <input type="text" id="loginUsername" class="form-input" placeholder="e.g. demo" required value="demo">
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="loginPassword">Password</label>
+          <div class="input-with-icon">
+            <span class="input-icon">🔒</span>
+            <input type="password" id="loginPassword" class="form-input" placeholder="••••••••" required value="demo123">
+            <button type="button" class="btn-toggle-pwd" onclick="togglePasswordVisibility('loginPassword', this)" title="Show/Hide Password">👁️</button>
+          </div>
+        </div>
+        <div class="auth-extra-row">
+          <label class="auth-remember-label">
+            <input type="checkbox" checked class="auth-checkbox">
+            <span>Remember this terminal</span>
+          </label>
+          <a href="#" class="auth-forgot-link" onclick="event.preventDefault();alert('Demo Credentials:\nUsername: demo\nPassword: demo123');">Forgot password?</a>
+        </div>
+        <button type="submit" class="btn auth-submit-btn">
+          <span>Sign In</span>
+          <span class="btn-arrow">→</span>
+        </button>
+      </form>
+
+      <!-- Form 2: Create Account -->
+      <form id="formRegister" onsubmit="handleRegister(event)" style="display:none;">
+        <div class="form-group">
+          <label class="form-label" for="regFullName">Full Name</label>
+          <input type="text" id="regFullName" class="form-input" placeholder="Virat Kohli" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="regUsername">Username</label>
+          <input type="text" id="regUsername" class="form-input" placeholder="vkohli18" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="regEmail">Work Email</label>
+          <input type="email" id="regEmail" class="form-input" placeholder="vkohli@india.cricket" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="regPassword">Password</label>
+          <input type="password" id="regPassword" class="form-input" placeholder="••••••••" required>
+        </div>
+        <div class="auth-reg-grid">
+          <div class="form-group">
+            <label class="form-label" for="regHandedness">Batting Hand</label>
+            <select id="regHandedness" class="form-input">
+              <option value="Right-Handed">Right-Handed</option>
+              <option value="Left-Handed">Left-Handed</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="regStyle">Batting Order</label>
+            <select id="regStyle" class="form-input">
+              <option value="Top Order">Top Order</option>
+              <option value="Middle Order">Middle Order</option>
+              <option value="Finisher">Finisher</option>
+            </select>
+          </div>
+        </div>
+        <button type="submit" class="btn auth-submit-btn">
+          <span>Create Account</span>
+          <span class="btn-arrow">✨</span>
+        </button>
+      </form>
+
+      <!-- Divider -->
+      <div class="auth-divider">
+        <span>or explore platform</span>
+      </div>
+
+      <!-- Instant Demo Guest Access -->
+      <button type="button" class="btn btn-secondary auth-demo-btn" onclick="loginDemoUser()">
+        <span class="auth-demo-icon">⚡</span>
+        <span>Instant Demo Guest Access</span>
+      </button>
+
+      <!-- Security / Sensor Stream Badge -->
+      <div class="auth-footer-badge">
+        <span class="auth-ping-dot"></span>
+        <span>Encrypted HawkEye Optical &amp; IMU Sensor Stream • TLS 1.3</span>
+      </div>
+    </section>
+
+    <!-- RIGHT: Hero Panel with Cricket Field Graphic & Tagline -->
+    <aside class="auth-hero-panel glass">
+      <!-- Cricket Field SVG Graphic with Glowing Green Shot Trails -->
+      <div class="hero-field-wrapper">
+        <svg class="cricket-field-svg" viewBox="0 0 540 440" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="groundGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#0a1329" stop-opacity="0.85"/>
+              <stop offset="100%" stop-color="#050a18" stop-opacity="0.95"/>
+            </linearGradient>
+            <linearGradient id="pitchGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+              <stop offset="0%" stop-color="#2a3352"/>
+              <stop offset="50%" stop-color="#1f2842"/>
+              <stop offset="100%" stop-color="#2a3352"/>
+            </linearGradient>
+            <linearGradient id="coverDriveGrad" x1="100%" y1="100%" x2="0%" y2="0%">
+              <stop offset="0%" stop-color="#22E58B" stop-opacity="0.2"/>
+              <stop offset="60%" stop-color="#22E58B" stop-opacity="0.95"/>
+              <stop offset="100%" stop-color="#73ffad" stop-opacity="1"/>
+            </linearGradient>
+            <linearGradient id="straightDriveGrad" x1="0%" y1="100%" x2="0%" y2="0%">
+              <stop offset="0%" stop-color="#00E5FF" stop-opacity="0.2"/>
+              <stop offset="100%" stop-color="#00E5FF" stop-opacity="0.9"/>
+            </linearGradient>
+            <linearGradient id="pullShotGrad" x1="0%" y1="100%" x2="100%" y2="0%">
+              <stop offset="0%" stop-color="#8B5CF6" stop-opacity="0.2"/>
+              <stop offset="100%" stop-color="#a78bfa" stop-opacity="0.9"/>
+            </linearGradient>
+            <filter id="glowGreen" x="-30%" y="-30%" width="160%" height="160%">
+              <feGaussianBlur stdDeviation="5" result="blur1"/>
+              <feGaussianBlur stdDeviation="2" result="blur2"/>
+              <feMerge>
+                <feMergeNode in="blur1"/>
+                <feMergeNode in="blur2"/>
+                <feMergeNode in="SourceGraphic"/>
+              </feMerge>
+            </filter>
+            <filter id="glowCyan" x="-30%" y="-30%" width="160%" height="160%">
+              <feGaussianBlur stdDeviation="4" result="blur"/>
+              <feMerge>
+                <feMergeNode in="blur"/>
+                <feMergeNode in="SourceGraphic"/>
+              </feMerge>
+            </filter>
+            <filter id="glowViolet" x="-30%" y="-30%" width="160%" height="160%">
+              <feGaussianBlur stdDeviation="4" result="blur"/>
+              <feMerge>
+                <feMergeNode in="blur"/>
+                <feMergeNode in="SourceGraphic"/>
+              </feMerge>
+            </filter>
+            <radialGradient id="impactGlow" cx="50%" cy="50%" r="50%">
+              <stop offset="0%" stop-color="#22E58B" stop-opacity="0.8"/>
+              <stop offset="50%" stop-color="#22E58B" stop-opacity="0.3"/>
+              <stop offset="100%" stop-color="#22E58B" stop-opacity="0"/>
+            </radialGradient>
+          </defs>
+
+          <!-- Outer boundary oval -->
+          <ellipse cx="270" cy="220" rx="245" ry="195" fill="url(#groundGrad)" stroke="rgba(255,255,255,0.12)" stroke-width="1.5"/>
+          <ellipse cx="270" cy="220" rx="243" ry="193" fill="none" stroke="rgba(34,229,139,0.3)" stroke-width="1" stroke-dasharray="8 6"/>
+
+          <!-- 30-Yard Inner Circle -->
+          <ellipse cx="270" cy="220" rx="145" ry="110" fill="none" stroke="rgba(0,229,255,0.22)" stroke-width="1.2" stroke-dasharray="5 5"/>
+          <text x="270" y="102" fill="rgba(0,229,255,0.5)" font-size="9" font-family="'Plus Jakarta Sans',sans-serif" font-weight="700" text-anchor="middle" letter-spacing="1.5">30-YARD FIELDING RESTRICTION</text>
+
+          <!-- Field Radial Grid lines (Sectors) -->
+          <line x1="270" y1="220" x2="65" y2="100" stroke="rgba(255,255,255,0.06)" stroke-width="1" stroke-dasharray="3 3"/>
+          <line x1="270" y1="220" x2="270" y2="30" stroke="rgba(255,255,255,0.06)" stroke-width="1" stroke-dasharray="3 3"/>
+          <line x1="270" y1="220" x2="475" y2="100" stroke="rgba(255,255,255,0.06)" stroke-width="1" stroke-dasharray="3 3"/>
+          <line x1="270" y1="220" x2="40" y2="240" stroke="rgba(255,255,255,0.06)" stroke-width="1" stroke-dasharray="3 3"/>
+          <line x1="270" y1="220" x2="500" y2="240" stroke="rgba(255,255,255,0.06)" stroke-width="1" stroke-dasharray="3 3"/>
+
+          <!-- Cricket Pitch 22 yards strip -->
+          <rect x="257" y="170" width="26" height="100" rx="4" fill="url(#pitchGrad)" stroke="rgba(255,255,255,0.25)" stroke-width="1"/>
+          <!-- Crease markings -->
+          <line x1="253" y1="188" x2="287" y2="188" stroke="rgba(255,255,255,0.6)" stroke-width="1.5"/>
+          <line x1="253" y1="252" x2="287" y2="252" stroke="rgba(255,255,255,0.7)" stroke-width="1.5"/>
+          <line x1="255" y1="244" x2="285" y2="244" stroke="rgba(255,255,255,0.4)" stroke-width="1"/>
+          <!-- Stumps -->
+          <circle cx="265" cy="186" r="1.5" fill="#f59e0b"/>
+          <circle cx="270" cy="186" r="1.5" fill="#f59e0b"/>
+          <circle cx="275" cy="186" r="1.5" fill="#f59e0b"/>
+          <circle cx="265" cy="254" r="1.5" fill="#f59e0b"/>
+          <circle cx="270" cy="254" r="1.5" fill="#f59e0b"/>
+          <circle cx="275" cy="254" r="1.5" fill="#f59e0b"/>
+
+          <!-- Sweet-spot impact glow at batsman position -->
+          <circle cx="270" cy="245" r="26" fill="url(#impactGlow)"/>
+          <circle cx="270" cy="245" r="5" fill="#22E58B" filter="url(#glowGreen)"/>
+
+          <!-- Shot 1: Secondary Straight Drive Trail -->
+          <path d="M 270 245 L 270 36" fill="none" stroke="url(#straightDriveGrad)" stroke-width="2.5" filter="url(#glowCyan)" stroke-linecap="round"/>
+          <circle cx="270" cy="36" r="4" fill="#00E5FF" filter="url(#glowCyan)"/>
+
+          <!-- Shot 2: Secondary Pull Shot Trail -->
+          <path d="M 270 245 Q 365 190 480 135" fill="none" stroke="url(#pullShotGrad)" stroke-width="2.2" filter="url(#glowViolet)" stroke-linecap="round"/>
+          <circle cx="480" cy="135" r="4" fill="#8B5CF6" filter="url(#glowViolet)"/>
+
+          <!-- Shot 3: PRIMARY COVER DRIVE TRAIL with GLOWING GREEN (Star of the show) -->
+          <path d="M 270 245 Q 185 185 62 108" fill="none" stroke="url(#coverDriveGrad)" stroke-width="4.5" filter="url(#glowGreen)" stroke-linecap="round" class="shot-trail-active"/>
+          <path d="M 270 245 Q 185 185 62 108" fill="none" stroke="#fff" stroke-width="1.8" stroke-dasharray="10 16" stroke-linecap="round" opacity="0.9"/>
+
+          <!-- Boundary impact terminal -->
+          <circle cx="62" cy="108" r="8" fill="#22E58B" filter="url(#glowGreen)" class="shot-pulse"/>
+          <circle cx="62" cy="108" r="3" fill="#ffffff"/>
+
+          <!-- Telemetry Badges / Overlay Tags on Field -->
+          <!-- Cover Drive Badge -->
+          <g transform="translate(38, 56)">
+            <rect width="144" height="34" rx="8" fill="rgba(15,20,36,0.88)" stroke="rgba(34,229,139,0.6)" stroke-width="1" filter="drop-shadow(0 4px 12px rgba(0,0,0,0.5))"/>
+            <circle cx="14" cy="17" r="4" fill="#22E58B" filter="url(#glowGreen)"/>
+            <text x="26" y="15" fill="#ffffff" font-size="11" font-family="'Plus Jakarta Sans',sans-serif" font-weight="700">Cover Drive</text>
+            <text x="26" y="27" fill="#22E58B" font-size="9.5" font-family="'JetBrains Mono',monospace" font-weight="600">138 km/h • 98% sweet</text>
+          </g>
+
+          <!-- Straight Drive Tag -->
+          <g transform="translate(202, 10)">
+            <rect width="136" height="22" rx="6" fill="rgba(15,20,36,0.85)" stroke="rgba(0,229,255,0.45)" stroke-width="0.8"/>
+            <text x="68" y="15" fill="#00E5FF" font-size="9" font-family="'Plus Jakarta Sans',sans-serif" font-weight="600" text-anchor="middle">Straight Drive 144 km/h</text>
+          </g>
+
+          <!-- Pull Shot Tag -->
+          <g transform="translate(390, 85)">
+            <rect width="115" height="22" rx="6" fill="rgba(15,20,36,0.85)" stroke="rgba(139,92,246,0.45)" stroke-width="0.8"/>
+            <text x="57" y="15" fill="#c4b5fd" font-size="9" font-family="'Plus Jakarta Sans',sans-serif" font-weight="600" text-anchor="middle">Pull Shot 132 km/h</text>
+          </g>
+
+          <!-- Pitch Angle Marker -->
+          <g transform="translate(195, 235)">
+            <rect width="60" height="20" rx="4" fill="rgba(10,15,30,0.8)" stroke="rgba(255,255,255,0.15)" stroke-width="0.8"/>
+            <text x="30" y="14" fill="#94A3B8" font-size="8.5" font-family="'JetBrains Mono',monospace" text-anchor="middle">45.2° Plane</text>
+          </g>
+        </svg>
+      </div>
+
+      <!-- Tagline & Narrative Section -->
+      <div class="auth-hero-copy">
+        <div class="hero-badge-pill">
+          <span class="hero-badge-dot"></span>
+          <span>Kinetic Telemetry Engine</span>
+        </div>
+        <h2 class="auth-hero-tagline">
+          Every shot, analysed in seconds<span class="text-primary">.</span>
+        </h2>
+        <p class="auth-hero-desc">
+          Capture high-frame-rate biomechanics, evaluate bat plane alignment, and receive instant broadcast-grade technique feedback.
+        </p>
+
+        <!-- Feature Spec Pills -->
+        <div class="auth-hero-features">
+          <div class="feature-chip">
+            <span class="feature-chip-icon">⚡</span>
+            <span>&lt;50ms Contact Sync</span>
+          </div>
+          <div class="feature-chip">
+            <span class="feature-chip-icon">📐</span>
+            <span>10-Feature Kinematics</span>
+          </div>
+          <div class="feature-chip">
+            <span class="feature-chip-icon">📺</span>
+            <span>Broadcast TV HUD</span>
+          </div>
+        </div>
+      </div>
+    </aside>
   </div>
 </div>
 
@@ -957,6 +1479,18 @@ let shotTaxonomy    = [];
 // ────────────────────────────────────────────────────────────────────────────
 // 1. AUTH
 // ────────────────────────────────────────────────────────────────────────────
+function togglePasswordVisibility(inputId, btn) {
+  const input = document.getElementById(inputId);
+  if (!input) return;
+  if (input.type === 'password') {
+    input.type = 'text';
+    btn.textContent = '🙈';
+  } else {
+    input.type = 'password';
+    btn.textContent = '👁️';
+  }
+}
+
 function toggleAuthTab(tab) {
   document.getElementById('formLogin').style.display    = (tab === 'login')    ? 'block' : 'none';
   document.getElementById('formRegister').style.display = (tab === 'register') ? 'block' : 'none';
